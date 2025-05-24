@@ -4,8 +4,10 @@ RUN apt-get update && apt-get install -y \
     cmake \
     g++ \
     git \
-    libcurl4-openssl-dev \
+    curl \
     libssl-dev \
+    libcurl4-openssl-dev \
+    libcurlpp-dev \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 

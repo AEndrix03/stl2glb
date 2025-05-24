@@ -12,17 +12,14 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/external/json/include
 )
 
-file(GLOB_RECURSE SOURCES
-        src/*.cpp
-)
+file(GLOB_RECURSE SOURCES src/*.cpp)
 
 add_executable(stl2glb_server ${SOURCES})
 
 target_link_libraries(stl2glb_server
         PRIVATE
-        ws2_32
-        crypt32
         ssl
         crypto
         curl
+        curlpp
 )

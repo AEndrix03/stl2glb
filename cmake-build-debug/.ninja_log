@@ -6,3 +6,4 @@
 68	2606	7697564930373818	CMakeFiles/stl2glb_server.dir/src/STLParser.cpp.obj	87c062487bb2fb6
 23	5943	7697564929918724	CMakeFiles/stl2glb_server.dir/src/GLBWriter.cpp.obj	41fa740134807b35
 2	442	7697574617651490	build.ninja	273e1f213b90b79a
+25	21945	7697574618348338	CMakeFiles/stl2glb_server.dir/src/Server.cpp.obj	e85da8e607a89262
