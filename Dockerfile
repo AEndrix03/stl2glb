@@ -15,10 +15,10 @@ WORKDIR /app
 
 COPY . .
 
-RUN git clone https://github.com/yhirose/cpp-httplib.git external/cpp-httplib && \
-    git clone https://github.com/syoyo/tinygltf.git external/tinygltf && \
-    git clone https://github.com/minio/minio-cpp.git external/minio-cpp && \
-    git clone https://github.com/nlohmann/json.git external/json
+RUN [ -d external/cpp-httplib ] || git clone https://github.com/yhirose/cpp-httplib.git external/cpp-httplib && \
+    [ -d external/tinygltf ] || git clone https://github.com/syoyo/tinygltf.git external/tinygltf && \
+    [ -d external/minio-cpp ] || git clone https://github.com/minio/minio-cpp.git external/minio-cpp && \
+    [ -d external/json ] || git clone https://github.com/nlohmann/json.git external/json
 
 RUN cmake -Bbuild -DCMAKE_BUILD_TYPE=Release . && cmake --build build --target stl2glb_server -j$(nproc)
 
