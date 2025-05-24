@@ -18,12 +18,11 @@ file(GLOB_RECURSE SOURCES
 
 add_executable(stl2glb_server ${SOURCES})
 
-find_package(OpenSSL REQUIRED)
-find_package(CURL REQUIRED)
-
 target_link_libraries(stl2glb_server
         PRIVATE
-        OpenSSL::SSL
-        OpenSSL::Crypto
-        CURL::libcurl
+        ws2_32
+        crypt32
+        ssl
+        crypto
+        curl
 )

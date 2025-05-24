@@ -1,0 +1,8 @@
+# ninja log v6
+2	3019	7697564929709447	CMakeFiles/stl2glb_server.dir/src/Converter.cpp.obj	7ac4f54334bf2896
+91	1526	7697564930600553	CMakeFiles/stl2glb_server.dir/src/main.cpp.obj	ab22297dec0a2709
+42	2667	7697564930110055	CMakeFiles/stl2glb_server.dir/src/Logger.cpp.obj	632ef756309accbc
+14	1714	7697564929833443	CMakeFiles/stl2glb_server.dir/src/EnvironmentHandler.cpp.obj	e6337cceaf11595f
+68	2606	7697564930373818	CMakeFiles/stl2glb_server.dir/src/STLParser.cpp.obj	87c062487bb2fb6
+23	5943	7697564929918724	CMakeFiles/stl2glb_server.dir/src/GLBWriter.cpp.obj	41fa740134807b35
+2	442	7697574617651490	build.ninja	273e1f213b90b79a

@@ -1,6 +1,6 @@
 #include "stl2glb/Server.hpp"
 #include "stl2glb/Converter.hpp"
-#include "external/cpp-httplib/httplib.h"
+#include <httplib.h>
 
 #include <nlohmann/json.hpp>
 
