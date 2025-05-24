@@ -15,11 +15,14 @@ WORKDIR /app
 
 COPY . .
 
-RUN [ -d external/cpp-httplib ] || git clone https://github.com/yhirose/cpp-httplib.git external/cpp-httplib && \
-    [ -d external/tinygltf ] || git clone https://github.com/syoyo/tinygltf.git external/tinygltf && \
-    [ -d external/minio-cpp ] || git clone https://github.com/minio/minio-cpp.git external/minio-cpp && \
-    [ -d external/json ] || git clone https://github.com/nlohmann/json.git external/json
+RUN rm -rf external/cpp-httplib && git clone https://github.com/yhirose/cpp-httplib.git external/cpp-httplib && \
+    rm -rf external/tinygltf && git clone https://github.com/syoyo/tinygltf.git external/tinygltf && \
+    rm -rf external/minio-cpp && git clone https://github.com/minio/minio-cpp.git external/minio-cpp && \
+    rm -rf external/json && git clone https://github.com/nlohmann/json.git external/json
 
-RUN cmake -Bbuild -DCMAKE_BUILD_TYPE=Release . && cmake --build build --target stl2glb_server -j$(nproc)
+RUN ls -lh external/tinygltf && head -n 5 external/tinygltf/tiny_gltf.h
+
+RUN cmake -Bbuild -DCMAKE_BUILD_TYPE=Release . && \
+    cmake --build build --target stl2glb_server -j$(nproc)
 
 CMD ["./build/stl2glb_server"]

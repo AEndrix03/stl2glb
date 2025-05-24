@@ -122,7 +122,7 @@ build CMakeFiles/stl2glb_server.dir/src/main.cpp.obj: CXX_COMPILER__stl2glb_serv
 
 build stl2glb_server.exe: CXX_EXECUTABLE_LINKER__stl2glb_server_Debug CMakeFiles/stl2glb_server.dir/src/Converter.cpp.obj CMakeFiles/stl2glb_server.dir/src/EnvironmentHandler.cpp.obj CMakeFiles/stl2glb_server.dir/src/GLBWriter.cpp.obj CMakeFiles/stl2glb_server.dir/src/Hasher.cpp.obj CMakeFiles/stl2glb_server.dir/src/Logger.cpp.obj CMakeFiles/stl2glb_server.dir/src/MinioClient.cpp.obj CMakeFiles/stl2glb_server.dir/src/STLParser.cpp.obj CMakeFiles/stl2glb_server.dir/src/Server.cpp.obj CMakeFiles/stl2glb_server.dir/src/main.cpp.obj
   FLAGS = -g
-  LINK_LIBRARIES = -lws2_32  -lcrypt32  -lssl  -lcrypto  -lcurl  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+  LINK_LIBRARIES = -lssl  -lcrypto  -lcurl  -lcurlpp  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\stl2glb_server.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
