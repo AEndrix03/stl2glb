@@ -1,5 +1,5 @@
 #include "stl2glb/GLBWriter.hpp"
-#include "tiny_gltf.h"
+#include "../external/tinygltf/tiny_gltf.h"
 #include <stdexcept>
 
 namespace stl2glb {
