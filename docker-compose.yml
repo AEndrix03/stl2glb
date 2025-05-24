@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  stl2glb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stl2glb
+    env_file:
+      - .env
+    ports:
+      - "9002:9002"
+    volumes:
+      - /tmp:/tmp
+    restart: unless-stopped

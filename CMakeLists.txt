@@ -9,6 +9,7 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/external/cpp-httplib
         ${CMAKE_CURRENT_SOURCE_DIR}/external/tinygltf
         ${CMAKE_CURRENT_SOURCE_DIR}/external/minio-cpp/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/json/include
 )
 
 file(GLOB_RECURSE SOURCES
