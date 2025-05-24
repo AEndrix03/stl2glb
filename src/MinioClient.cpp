@@ -14,16 +14,17 @@ namespace stl2glb {
     static std::shared_ptr<s3::Client> createClient() {
         auto& env = EnvironmentHandler::instance();
 
-        s3::BaseUrl base_url{env.getMinioEndpoint()};
-        auto* provider = new creds::StaticProvider(env.getMinioAccessKey(), env.getMinioSecretKey());
-
-        return std::make_shared<s3::Client>(
-                base_url,
-                provider,
-                "us-east-1",
-                "v4",
-                false
+        auto credentials = std::make_shared<minio::creds::StaticProvider>(
+                env.getMinioAccessKey(),
+                env.getMinioSecretKey()
         );
+
+        minio::s3::BaseUrl baseUrl{env.getMinioEndpoint()};
+
+        auto client = std::shared_ptr<minio::s3::Client>(
+                new minio::s3::Client(baseUrl, credentials.get())
+        );
+        return client;
     }
 
     void stl2glb::MinioClient::download(const std::string& bucket,
