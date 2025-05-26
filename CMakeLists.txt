@@ -33,5 +33,5 @@ target_link_libraries(stl2glb PUBLIC
         OpenSSL::Crypto
 )
 
-add_executable(stl2glb main.cpp)
-target_link_libraries(stl2glb PRIVATE stl2glb)
+add_executable(stl2glb_exec main.cpp)
+target_link_libraries(stl2glb_exec PRIVATE stl2glb)
