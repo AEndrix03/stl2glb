@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(OpenSSL REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(httplib CONFIG REQUIRED)
-find_package(tinygltf REQUIRED) # tinygltf è header-only, quindi usa find_path
 find_package(miniocpp CONFIG REQUIRED)  # attenzione al nome esatto
 
 add_library(stl2glb
