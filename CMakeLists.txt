@@ -10,21 +10,17 @@ find_package(nlohmann_json CONFIG REQUIRED)
 find_package(httplib CONFIG REQUIRED)
 find_package(miniocpp CONFIG REQUIRED)
 
-# TinyGLTF è header only, trova path include
-find_path(TINYGLTF_INCLUDE_DIRS "tiny_gltf.h" PATH_SUFFIXES tinygltf)
-if(NOT TINYGLTF_INCLUDE_DIRS)
-    message(FATAL_ERROR "tinygltf headers not found")
-endif()
-
 # Raccogli sorgenti cpp dalla cartella src
 file(GLOB SOURCES "src/*.cpp")
+
+list(APPEND SOURCES "external/tinygltf/tiny_gltf.cc")
 
 add_library(stl2glb ${SOURCES})
 
 # Imposta include directory pubbliche (include root e tinygltf)
 target_include_directories(stl2glb PUBLIC
         include
-        ${TINYGLTF_INCLUDE_DIRS}
+        external/tinygltf
 )
 
 # Linka le librerie trovate
