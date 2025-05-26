@@ -1,7 +1,7 @@
 # Stage 1: build
 FROM ubuntu:22.04 AS builder
 
-RUN apt-get update && apt-get install -y build-essential cmake ninja-build git curl unzip pkg-config
+RUN apt-get update && apt-get install -y build-essential cmake ninja-build git curl unzip pkg-config zip python3
 
 # Clona vcpkg e bootstrap
 RUN git clone https://github.com/microsoft/vcpkg.git /external/vcpkg
