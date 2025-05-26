@@ -9,4 +9,3 @@ services:
     volumes:
       - ./:/project
     working_dir: /project/build
-    command: ./stl2glb_exec
