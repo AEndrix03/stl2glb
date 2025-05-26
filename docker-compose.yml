@@ -2,14 +2,19 @@ version: "3.9"
 
 services:
   stl2glb:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: stl2glb
+    build: .
+    ports:
+      - "9002:${STL2GLB_PORT}"
     env_file:
       - .env
-    ports:
-      - "9002:9002"
     volumes:
-      - /tmp:/tmp
-    restart: unless-stopped
+      - ./:/project
+    working_dir: /project/build
+    command: >
+      bash -c "
+      mkdir -p /project/build &&
+      cd /project/build &&
+      cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=/project/external/vcpkg/scripts/buildsystems/vcpkg.cmake -G Ninja &&
+      cmake --build . &&
+      ./stl2glb
+      "
