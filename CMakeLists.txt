@@ -7,17 +7,22 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(OpenSSL REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(httplib CONFIG REQUIRED)
-find_package(miniocpp CONFIG REQUIRED)  # attenzione al nome esatto
+find_package(miniocpp CONFIG REQUIRED)
 
-add_library(stl2glb
-        Converter.cpp
-        EnvironmentHandler.cpp
-        GLBWriter.cpp
-        Hasher.cpp
-        Logger.cpp
-        MinioClient.cpp
-        Server.cpp
-        STLParser.cpp
+find_path(TINYGLTF_INCLUDE_DIRS "tiny_gltf.h" PATH_SUFFIXES tinygltf)
+
+if (NOT TINYGLTF_INCLUDE_DIRS)
+    message(FATAL_ERROR "Could not find tinygltf headers")
+endif()
+
+file(GLOB SOURCES "src/*.cpp")
+# opzionale: file(GLOB HEADERS "includes/*.hpp")
+
+add_library(stl2glb ${SOURCES})
+
+target_include_directories(stl2glb PUBLIC
+        includes
+        ${TINYGLTF_INCLUDE_DIRS}
 )
 
 target_link_libraries(stl2glb PUBLIC
@@ -28,12 +33,5 @@ target_link_libraries(stl2glb PUBLIC
         miniocpp::miniocpp
 )
 
-find_path(TINYGLTF_INCLUDE_DIRS "tiny_gltf.h" PATH_SUFFIXES tinygltf)
-if (TINYGLTF_INCLUDE_DIRS)
-    target_include_directories(stl2glb PUBLIC ${TINYGLTF_INCLUDE_DIRS})
-else()
-    message(FATAL_ERROR "Could not find tinygltf headers")
-endif()
-
-add_executable(stl2glb_exec main.cpp)
+add_executable(stl2glb_exec src/main.cpp)
 target_link_libraries(stl2glb_exec PRIVATE stl2glb)
