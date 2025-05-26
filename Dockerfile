@@ -19,15 +19,15 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /project
 
 # Clona vcpkg se manca e bootstrap
-RUN if [ ! -d /external/vcpkg ]; then \
-      git clone https://github.com/microsoft/vcpkg.git /external/vcpkg && \
-      /external/vcpkg/bootstrap-vcpkg.sh; \
+RUN if [ ! -d ./external/vcpkg ]; then \
+      git clone https://github.com/microsoft/vcpkg.git ./external/vcpkg && \
+      ./external/vcpkg/bootstrap-vcpkg.sh; \
     else \
       echo "vcpkg already present"; \
     fi
 
-ENV VCPKG_ROOT=/external/vcpkg
-ENV CMAKE_TOOLCHAIN_FILE=/external/vcpkg/scripts/buildsystems/vcpkg.cmake
+ENV VCPKG_ROOT=./external/vcpkg
+ENV CMAKE_TOOLCHAIN_FILE=./external/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 COPY . /project
 
