@@ -16,12 +16,12 @@ if (NOT TINYGLTF_INCLUDE_DIRS)
 endif()
 
 file(GLOB SOURCES "src/*.cpp")
-# opzionale: file(GLOB HEADERS "includes/*.hpp")
+file(GLOB HEADERS "include/*.hpp")
 
 add_library(stl2glb ${SOURCES})
 
 target_include_directories(stl2glb PUBLIC
-        includes
+        include
         ${TINYGLTF_INCLUDE_DIRS}
 )
 
