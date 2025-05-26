@@ -8,9 +8,9 @@ services:
       - .env
     volumes:
       - ./:/project
-      - vcpkg_installed:external/vcpkg/installed
-      - vcpkg_buildtrees:external/vcpkg/buildtrees
-      - vcpkg_packages:external/vcpkg/packages
+      - vcpkg_installed:/home/applications/stl2glb/external/vcpkg/installed
+      - vcpkg_buildtrees:/home/applications/stl2glb/external/vcpkg/buildtrees
+      - vcpkg_packages:/home/applications/stl2glb/external/vcpkg/packages
     working_dir: /project/build
     command: ./stl2glb_exec
 
