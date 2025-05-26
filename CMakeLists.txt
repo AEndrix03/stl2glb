@@ -4,18 +4,11 @@ project(stl2glb VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Solo OpenSSL con find_package
 find_package(OpenSSL REQUIRED)
-
-# Aggiungi gli include manuali per le librerie clonate (modifica i path se serve)
-target_include_directories(stl2glb PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/external/json/include>          # nlohmann_json
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/external/cpp-httplib>           # cpp-httplib
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/external/tinygltf>              # tinygltf
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/external/minio-cpp/include>     # minio-cpp
-        $<INSTALL_INTERFACE:include>
-)
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(cpp-httplib CONFIG REQUIRED)
+find_package(tinygltf CONFIG REQUIRED)
+find_package(minio-cpp CONFIG REQUIRED)
 
 add_library(stl2glb
         Converter.cpp
@@ -31,6 +24,10 @@ add_library(stl2glb
 target_link_libraries(stl2glb PUBLIC
         OpenSSL::SSL
         OpenSSL::Crypto
+        nlohmann_json::nlohmann_json
+        cpp-httplib::cpp-httplib
+        tinygltf::tinygltf
+        minio-cpp::minio-cpp
 )
 
 add_executable(stl2glb_exec main.cpp)
