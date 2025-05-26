@@ -3,29 +3,39 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
-    build-essential git cmake curl unzip pkg-config wget \
-    ca-certificates python3 python3-pip ninja-build
+    build-essential \
+    git \
+    cmake \
+    ninja-build \
+    curl \
+    unzip \
+    pkg-config \
+    libssl-dev \
+    ca-certificates \
+    python3 \
+    python3-pip \
+    wget
 
 WORKDIR /project
 
-# Clona solo vcpkg se mancante
-RUN if [ ! -d /opt/vcpkg ]; then \
-      git clone https://github.com/microsoft/vcpkg.git /opt/vcpkg && \
-      /opt/vcpkg/bootstrap-vcpkg.sh; \
-    else echo "vcpkg already present"; fi
+# Clona vcpkg se manca e bootstrap
+RUN if [ ! -d /external/vcpkg ]; then \
+      git clone https://github.com/microsoft/vcpkg.git /external/vcpkg && \
+      /external/vcpkg/bootstrap-vcpkg.sh; \
+    else \
+      echo "vcpkg already present"; \
+    fi
 
-# Setta variabili ambiente per vcpkg
-ENV VCPKG_ROOT=/opt/vcpkg
-ENV CMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake
+ENV VCPKG_ROOT=/external/vcpkg
+ENV CMAKE_TOOLCHAIN_FILE=/external/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 COPY . /project
 
-WORKDIR /project/build
-
 RUN mkdir -p /project/build
 
-# Qui cmake e build, ma i pacchetti li installiamo tramite volume in compose
-RUN cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE -G Ninja && \
-    cmake --build .
+WORKDIR /project/build
+
+RUN cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE -G Ninja
+RUN cmake --build .
 
 CMD ["./stl2glb_exec"]

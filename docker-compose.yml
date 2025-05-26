@@ -1,5 +1,4 @@
 version: "3.9"
-
 services:
   stl2glb:
     build: .
@@ -9,18 +8,13 @@ services:
       - .env
     volumes:
       - ./:/project
-      - vcpkg_data:/opt/vcpkg/installed
-      - vcpkg_cache:/opt/vcpkg/packages
-      - vcpkg_buildtrees:/opt/vcpkg/buildtrees
+      - vcpkg_installed:./external/vcpkg/installed
+      - vcpkg_buildtrees:./external/vcpkg/buildtrees
+      - vcpkg_packages:./external/vcpkg/packages
     working_dir: /project/build
-    command: >
-      bash -c "
-      cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake -G Ninja &&
-      cmake --build .
-      ./stl2glb_exec
-      "
+    command: ./stl2glb_exec
 
 volumes:
-  vcpkg_data:
-  vcpkg_cache:
+  vcpkg_installed:
   vcpkg_buildtrees:
+  vcpkg_packages:

@@ -6,9 +6,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(OpenSSL REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-find_package(cpp-httplib CONFIG REQUIRED)
-find_package(tinygltf CONFIG REQUIRED)
-find_package(minio-cpp CONFIG REQUIRED)
+find_package(httplib CONFIG REQUIRED)
+find_package(tinygltf REQUIRED) # tinygltf è header-only, quindi usa find_path
+find_package(miniocpp CONFIG REQUIRED)  # attenzione al nome esatto
 
 add_library(stl2glb
         Converter.cpp
@@ -25,10 +25,16 @@ target_link_libraries(stl2glb PUBLIC
         OpenSSL::SSL
         OpenSSL::Crypto
         nlohmann_json::nlohmann_json
-        cpp-httplib::cpp-httplib
-        tinygltf::tinygltf
-        minio-cpp::minio-cpp
+        httplib::httplib
+        miniocpp::miniocpp
 )
+
+find_path(TINYGLTF_INCLUDE_DIRS "tiny_gltf.h" PATH_SUFFIXES tinygltf)
+if (TINYGLTF_INCLUDE_DIRS)
+    target_include_directories(stl2glb PUBLIC ${TINYGLTF_INCLUDE_DIRS})
+else()
+    message(FATAL_ERROR "Could not find tinygltf headers")
+endif()
 
 add_executable(stl2glb_exec main.cpp)
 target_link_libraries(stl2glb_exec PRIVATE stl2glb)
