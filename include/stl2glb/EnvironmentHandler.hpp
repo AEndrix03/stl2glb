@@ -9,7 +9,6 @@ namespace stl2glb {
 
         void init();
 
-        int getPort() const;
         const std::string& getStlBucketName() const;
         const std::string& getGlbBucketName() const;
 
@@ -20,7 +19,6 @@ namespace stl2glb {
     private:
         EnvironmentHandler() = default;
 
-        int port = 8000;
         std::string stlBucketName;
         std::string glbBucketName;
 

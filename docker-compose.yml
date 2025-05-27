@@ -1,12 +1,18 @@
 version: "3.9"
 services:
   stl2glb:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "9002:${STL2GLB_PORT}"
+      - "9002:8080"
     env_file:
       - .env
     volumes:
-      - ./:/project
+      - vcpkg_cache:/root/vcpkg
+      - ./:/workdir
     working_dir: /project/build
+
+volumes:
+  vcpkg_cache:

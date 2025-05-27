@@ -10,7 +10,6 @@ namespace stl2glb {
     }
 
     void EnvironmentHandler::init() {
-        const char* port_env = std::getenv("STL2GLB_PORT");
         const char* stl_bucket = std::getenv("STL2GLB_STL_BUCKET_NAME");
         const char* glb_bucket = std::getenv("STL2GLB_GLB_BUCKET_NAME");
         const char* endpoint = std::getenv("STL2GLB_MINIO_ENDPOINT");
@@ -21,21 +20,11 @@ namespace stl2glb {
             throw std::runtime_error("Missing one or more required environment variables.");
         }
 
-        if (port_env) {
-            port = std::stoi(port_env);
-            if (port < 1 || port > 65535)
-                throw std::runtime_error("Invalid port number.");
-        }
-
         stlBucketName = stl_bucket;
         glbBucketName = glb_bucket;
         minioEndpoint = endpoint;
         minioAccessKey = accessKey;
         minioSecretKey = secretKey;
-    }
-
-    int EnvironmentHandler::getPort() const {
-        return port;
     }
 
     const std::string& EnvironmentHandler::getStlBucketName() const {
