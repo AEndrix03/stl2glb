@@ -2,6 +2,7 @@ version: "3.9"
 services:
   stl2glb:
     build: .
+    restart: unless-stopped
     ports:
       - "9002:${STL2GLB_PORT}"
     env_file:

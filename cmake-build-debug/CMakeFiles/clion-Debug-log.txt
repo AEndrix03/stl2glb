@@ -6,7 +6,7 @@ CMake Error at E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modu
 Call Stack (most recent call first):
   E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake:603 (_FPHSA_FAILURE_MESSAGE)
   E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/FindOpenSSL.cmake:691 (find_package_handle_standard_args)
-  CMakeLists.txt:7 (find_package)
+  CMakeLists.txt:8 (find_package)
 
 
 -- Configuring incomplete, errors occurred!
