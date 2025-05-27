@@ -5,9 +5,9 @@ services:
     image: ubuntu:22.04
     container_name: stl2glb_builder
     volumes:
-      - ./:/workdir
+      - ./:/project
       - vcpkg_cache:/root/vcpkg
-    working_dir: /workdir
+    working_dir: /project
     command: >
       bash -c "
       apt-get update &&
@@ -22,8 +22,8 @@ services:
     depends_on:
       - builder
     volumes:
-      - ./:/workdir
-    working_dir: /workdir
+      - ./:/project
+    working_dir: /project
     command: ./build/stl2glb_exec
     environment:
       - .env
@@ -36,5 +36,5 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /home/tuo_utente/vcpkg
+      device: /home/vcpkg
       o: bind
