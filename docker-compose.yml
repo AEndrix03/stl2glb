@@ -1,16 +1,12 @@
 version: "3.8"
 
-volumes:
-  vcpkg_cache:
-    external: true
-
 services:
   builder:
     image: ubuntu:22.04
     container_name: stl2glb_builder
     volumes:
       - ./:/workdir
-      - vcpkg_cache:/root/vcpkg:rw
+      - vcpkg_cache:/root/vcpkg
     working_dir: /workdir
     command: >
       bash -c "
@@ -29,6 +25,16 @@ services:
       - ./:/workdir
     working_dir: /workdir
     command: ./build/stl2glb_exec
+    environment:
+      - .env
     ports:
       - "9002:9002"
     restart: unless-stopped
+
+volumes:
+  vcpkg_cache:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/tuo_utente/vcpkg
+      o: bind
