@@ -9,11 +9,3 @@ services:
       - "9002:8080"
     env_file:
       - .env
-    volumes:
-      - vcpkg_cache:/root/vcpkg
-      - ./:/workdir
-    working_dir: /workdir/build
-
-volumes:
-  vcpkg_cache:
-    external: true
