@@ -1,11 +1,34 @@
-version: "3.9"
+version: "3.8"
+
+volumes:
+  vcpkg_cache:
+    external: true
+
 services:
-  stl2glb:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
+  builder:
+    image: ubuntu:22.04
+    container_name: stl2glb_builder
+    volumes:
+      - ./:/workdir
+      - vcpkg_cache:/root/vcpkg:rw
+    working_dir: /workdir
+    command: >
+      bash -c "
+      apt-get update &&
+      apt-get install -y build-essential cmake git curl unzip &&
+      cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=/root/vcpkg/scripts/buildsystems/vcpkg.cmake &&
+      cmake --build build --config Release
+      "
+
+  app:
+    image: ubuntu:22.04
+    container_name: stl2glb_app
+    depends_on:
+      - builder
+    volumes:
+      - ./:/workdir
+    working_dir: /workdir
+    command: ./build/stl2glb_exec
     ports:
-      - "9002:8080"
-    env_file:
-      - .env
+      - "9002:9002"
+    restart: unless-stopped
