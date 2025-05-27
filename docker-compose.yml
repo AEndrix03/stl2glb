@@ -12,7 +12,7 @@ services:
     volumes:
       - vcpkg_cache:/root/vcpkg
       - ./:/workdir
-    working_dir: /project/build
+    working_dir: /workdir/build
 
 volumes:
   vcpkg_cache:
