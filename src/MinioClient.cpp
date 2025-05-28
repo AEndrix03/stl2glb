@@ -46,8 +46,8 @@ namespace stl2glb {
 
         auto result = client->DownloadObject(args);
         if (!result) {
-            stl2glb::Logger::error("Download da MinIO fallito: " + std::string(result.GetMessage()));
-            throw std::runtime_error("Errore nel download da MinIO: " + std::string(result.GetMessage()));
+            stl2glb::Logger::error("Download da MinIO fallito: " + result.message);
+            throw std::runtime_error("Errore nel download da MinIO: " + result.message);
         }
 
         stl2glb::Logger::info(std::string("Download riuscito: ") + objectName);
@@ -67,8 +67,8 @@ namespace stl2glb {
 
         auto result = client->UploadObject(args);
         if (!result) {
-            stl2glb::Logger::error("Upload su MinIO fallito: " + std::string(result.GetMessage()));
-            throw std::runtime_error("Errore durante l'upload su MinIO: " + std::string(result.GetMessage()));
+            stl2glb::Logger::error("Upload su MinIO fallito: " + result.message);
+            throw std::runtime_error("Errore durante l'upload su MinIO: " + result.message);
         }
 
         stl2glb::Logger::info(std::string("Upload riuscito: ") + objectName);
