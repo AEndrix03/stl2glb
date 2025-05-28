@@ -1,18 +1,26 @@
 version: "3.8"
 
+volumes:
+  vcpkg_cache:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/tuo_utente/vcpkg
+      o: bind
+
 services:
   builder:
     image: ubuntu:22.04
     container_name: stl2glb_builder
     volumes:
       - ./:/project
-      - vcpkg_cache:/root/vcpkg
+      - vcpkg_cache:/project/external/vcpkg
     working_dir: /project
     command: >
       bash -c "
       apt-get update &&
-      apt-get install -y build-essential cmake git curl unzip &&
-      cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=/root/vcpkg/scripts/buildsystems/vcpkg.cmake &&
+      apt-get install -y build-essential cmake git curl unzip ninja-build &&
+      cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=/project/external/vcpkg/scripts/buildsystems/vcpkg.cmake &&
       cmake --build build --config Release
       "
 
@@ -25,16 +33,8 @@ services:
       - ./:/project
     working_dir: /project
     command: ./build/stl2glb_exec
-    environment:
-      - .env
     ports:
       - "9002:9002"
     restart: unless-stopped
-
-volumes:
-  vcpkg_cache:
-    driver: local
-    driver_opts:
-      type: none
-      device: /home/vcpkg
-      o: bind
+    env_file:
+      - .env
