@@ -20,17 +20,27 @@ namespace stl2glb {
     static ClientWrapper createClient() {
         auto& env = EnvironmentHandler::instance();
 
+        std::string accessKey = env.getMinioAccessKey();
+        std::string secretKey = env.getMinioSecretKey();
+        std::string endpoint = env.getMinioEndpoint();
+
+        // Log in console per debug
+        std::cout << "[MinioClient] Access Key: " << accessKey << std::endl;
+        std::cout << "[MinioClient] Secret Key: " << secretKey << std::endl;
+        std::cout << "[MinioClient] Endpoint: " << endpoint << std::endl;
+
         auto credentials = std::make_shared<minio::creds::StaticProvider>(
-                env.getMinioAccessKey(),
-                env.getMinioSecretKey()
+                accessKey,
+                secretKey
         );
 
-        minio::s3::BaseUrl baseUrl{env.getMinioEndpoint()};
+        minio::s3::BaseUrl baseUrl{endpoint};
 
         auto client = std::make_shared<minio::s3::Client>(baseUrl, credentials.get());
 
         return ClientWrapper{credentials, client};
     }
+
 
     void MinioClient::download(const std::string& bucket,
                                const std::string& objectName,
