@@ -26,6 +26,9 @@ services:
 
   app:
     image: ubuntu:22.04
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     container_name: stl2glb_app
     depends_on:
       - builder
