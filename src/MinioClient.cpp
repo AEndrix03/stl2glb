@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <cstdlib>
 #include <memory>
+#include <iostream>
 
 using namespace minio;
 
@@ -42,6 +43,10 @@ namespace stl2glb {
         args.object = objectName;
         args.filename = localPath;
         args.overwrite = true;
+
+        std::cout << args.bucket << std::endl;
+        std::cout << args.object << std::endl;
+        std::cout << args.filename << std::endl;
 
         auto result = client->DownloadObject(args);
 
