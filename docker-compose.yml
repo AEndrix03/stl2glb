@@ -34,7 +34,7 @@ services:
     working_dir: /project
     command: ./build/stl2glb_exec
     ports:
-      - "9002:9002"
+      - "9002:8080"
     restart: unless-stopped
     env_file:
       - .env
