@@ -11,7 +11,12 @@ using namespace minio;
 
 namespace stl2glb {
 
-    static std::shared_ptr<s3::Client> createClient() {
+    struct ClientWrapper {
+        std::shared_ptr<minio::creds::StaticProvider> credentials;
+        std::shared_ptr<minio::s3::Client> client;
+    };
+
+    static ClientWrapper createClient() {
         auto& env = EnvironmentHandler::instance();
 
         auto credentials = std::make_shared<minio::creds::StaticProvider>(
@@ -21,16 +26,16 @@ namespace stl2glb {
 
         minio::s3::BaseUrl baseUrl{env.getMinioEndpoint()};
 
-        auto client = std::shared_ptr<minio::s3::Client>(
-                new minio::s3::Client(baseUrl, credentials.get())
-        );
-        return client;
+        auto client = std::make_shared<minio::s3::Client>(baseUrl, credentials.get());
+
+        return ClientWrapper{credentials, client};
     }
 
-    void stl2glb::MinioClient::download(const std::string& bucket,
-                                        const std::string& objectName,
-                                        const std::string& localPath) {
-        auto client = createClient();
+    void MinioClient::download(const std::string& bucket,
+                               const std::string& objectName,
+                               const std::string& localPath) {
+        auto wrapper = createClient();
+        auto& client = wrapper.client;
 
         s3::DownloadObjectArgs args;
         args.bucket = bucket;
@@ -50,7 +55,8 @@ namespace stl2glb {
     void MinioClient::upload(const std::string& bucket,
                              const std::string& objectName,
                              const std::string& localPath) {
-        auto client = createClient();
+        auto wrapper = createClient();
+        auto& client = wrapper.client;
 
         s3::UploadObjectArgs args;
         args.bucket = bucket;
@@ -66,7 +72,5 @@ namespace stl2glb {
 
         stl2glb::Logger::info(std::string("Upload riuscito: ") + objectName);
     }
-
-
 
 } // namespace stl2glb
