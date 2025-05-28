@@ -44,14 +44,10 @@ namespace stl2glb {
         args.filename = localPath;
         args.overwrite = true;
 
-        std::cout << args.bucket << std::endl;
-        std::cout << args.object << std::endl;
-        std::cout << args.filename << std::endl;
-
         auto result = client->DownloadObject(args);
-
         if (!result) {
-            throw std::runtime_error("Errore nel download da MinIO");
+            stl2glb::Logger::error("Download da MinIO fallito: " + std::string(result.GetMessage()));
+            throw std::runtime_error("Errore nel download da MinIO: " + std::string(result.GetMessage()));
         }
 
         stl2glb::Logger::info(std::string("Download riuscito: ") + objectName);
@@ -70,9 +66,9 @@ namespace stl2glb {
         args.content_type = "model/gltf-binary";
 
         auto result = client->UploadObject(args);
-
         if (!result) {
-            throw std::runtime_error("Errore durante l'upload su MinIO");
+            stl2glb::Logger::error("Upload su MinIO fallito: " + std::string(result.GetMessage()));
+            throw std::runtime_error("Errore durante l'upload su MinIO: " + std::string(result.GetMessage()));
         }
 
         stl2glb::Logger::info(std::string("Upload riuscito: ") + objectName);
