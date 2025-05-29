@@ -56,8 +56,13 @@ namespace stl2glb {
 
         auto result = client->DownloadObject(args);
         if (!result) {
-            stl2glb::Logger::error("Download da MinIO fallito: " + result.message);
-            throw std::runtime_error("Errore nel download da MinIO: " + result.message);
+            std::string errorMessage = "Download da MinIO fallito: ";
+            if (!result.message.empty()) {
+                errorMessage += "Message: " + result.message;
+            }
+            errorMessage += " | Error Code: " + std::to_string(result.error_code); // Aggiungi questa riga
+            stl2glb::Logger::error(errorMessage);
+            throw std::runtime_error("Errore nel download da MinIO: " + result.message); // Qui il messaggio potrebbe essere ancora vuoto, ma il log sopra sarà più utile
         }
 
         stl2glb::Logger::info(std::string("Download riuscito: ") + objectName);
