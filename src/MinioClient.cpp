@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <memory>
 #include <iostream>
+#include <filesystem>
 
 using namespace minio;
 
@@ -47,6 +48,20 @@ namespace stl2glb {
                                const std::string& localPath) {
         auto wrapper = createClient();
         auto& client = wrapper.client;
+
+        std::filesystem::path destPath(localPath);
+        if (destPath.has_parent_path()) {
+            std::filesystem::path parentDir = destPath.parent_path();
+            if (!std::filesystem::exists(parentDir)) {
+                try {
+                    std::filesystem::create_directories(parentDir); // Crea ricorsivamente le directory
+                    stl2glb::Logger::info("Creata directory di destinazione: " + parentDir.string());
+                } catch (const std::filesystem::filesystem_error& e) {
+                    stl2glb::Logger::error("Impossibile creare la directory di destinazione " + parentDir.string() + ": " + e.what());
+                    throw std::runtime_error("Errore nella creazione della directory di destinazione: " + std::string(e.what()));
+                }
+            }
+        }
 
         s3::DownloadObjectArgs args;
         args.bucket = bucket;
