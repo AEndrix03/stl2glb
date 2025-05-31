@@ -26,18 +26,43 @@ services:
 
   app:
     image: ubuntu:22.04
+    # Configurazione DNS migliorata
     dns:
       - 8.8.8.8
       - 8.8.4.4
+      - 1.1.1.1  # Aggiunti più server DNS per redundancy
+    # Abilitare il networking host per accedere meglio alle risorse esterne
+    # Scommentare se stai utilizzando Docker in modalità standalone
+    # network_mode: "host"
     container_name: stl2glb_app
     depends_on:
       - builder
     volumes:
       - ./:/project
     working_dir: /project
-    command: ./build/stl2glb_exec
+    command: >
+      bash -c "
+      apt-get update &&
+      apt-get install -y iputils-ping curl &&
+      echo 'Testing connectivity to MinIO...' &&
+      ping -c 4 217.160.248.228 &&
+      curl -v http://217.160.248.228:7800 &&
+      echo 'Starting application...' &&
+      ./build/stl2glb_exec
+      "
     ports:
       - "9002:8080"
     restart: unless-stopped
     env_file:
       - .env
+    # Extra hosts per forzare la risoluzione dell'hostname
+    extra_hosts:
+      - "minio:217.160.248.228"
+      - "minio.aredegalli.it:217.160.248.228"
+    # Controlli sulla salute per verificare che l'app stia funzionando
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s

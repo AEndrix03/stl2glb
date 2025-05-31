@@ -23,8 +23,10 @@ namespace stl2glb {
             std::string secretKey = env.getMinioSecretKey();
             std::string endpoint = env.getMinioEndpoint();
 
-            // Non logghiamo più le credenziali
+            // Log per debug
             Logger::info("Initializing MinIO client with endpoint: " + endpoint);
+            Logger::info("Access Key length: " + std::to_string(accessKey.length()));
+            Logger::info("Secret Key length: " + std::to_string(secretKey.length()));
 
             credentials = std::make_shared<minio::creds::StaticProvider>(
                     accessKey,
@@ -38,15 +40,46 @@ namespace stl2glb {
                 Logger::info("Adjusted endpoint with HTTP protocol: " + endpoint);
             }
 
+            // Rimuovi una potenziale doppia specificazione del protocollo
+            // (in caso l'utente abbia configurato http://http://...)
+            if (endpoint.find("http://http://") == 0) {
+                endpoint = endpoint.substr(7);
+                Logger::info("Fixed double http:// in endpoint: " + endpoint);
+            } else if (endpoint.find("https://http://") == 0) {
+                endpoint = endpoint.substr(8);
+                Logger::info("Fixed https://http:// in endpoint: " + endpoint);
+            }
+
+            // Log per debug di connessione
+            Logger::info("Testing connection to endpoint before initializing client...");
+
+            // Test di ping semplice (solo log)
+            try {
+                httplib::Client cli(endpoint);
+                auto res = cli.Get("/");
+                if (res) {
+                    Logger::info("Endpoint ping successful. Status: " + std::to_string(res->status));
+                } else {
+                    Logger::error("Endpoint ping failed: " + httplib::to_string(res.error()));
+                }
+            } catch (const std::exception& e) {
+                Logger::error("Exception during endpoint ping: " + std::string(e.what()));
+            }
+
             minio::s3::BaseUrl baseUrl{endpoint};
 
-            // Nella tua versione di minio-cpp non sembra esserci ClientConfig
             // Creiamo il client senza configurazione aggiuntiva
             client = std::make_shared<minio::s3::Client>(baseUrl, credentials.get());
 
             // Verifica che i bucket esistano e creali se necessario
-            ensureBucketExists(env.getStlBucketName());
-            ensureBucketExists(env.getGlbBucketName());
+            // Non lanciamo eccezioni per permettere al programma di continuare
+            try {
+                ensureBucketExists(env.getStlBucketName());
+                ensureBucketExists(env.getGlbBucketName());
+            } catch (const std::exception& e) {
+                Logger::error("Failed to ensure buckets exist: " + std::string(e.what()));
+                Logger::info("Continuing anyway...");
+            }
         }
 
         void ensureBucketExists(const std::string& bucketName) {
