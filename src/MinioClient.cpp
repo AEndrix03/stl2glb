@@ -50,7 +50,8 @@ namespace stl2glb {
                     throw std::runtime_error("MinIO error: " + result.message);
                 }
 
-                if (!result.value) {
+                // La risposta è la struttura stessa, non un campo value
+                if (!result) {
                     Logger::info("Creating bucket: " + bucketName);
                     minio::s3::MakeBucketArgs mkArgs;
                     mkArgs.bucket = bucketName;
