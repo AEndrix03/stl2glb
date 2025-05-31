@@ -6,7 +6,8 @@
 #include <string.h>
 #include <vector>
 #include <sstream>
-#include <openssl/sha.h>
+#include <openssl/evp.h>
+#include <memory>
 
 namespace stl2glb {
 
@@ -74,27 +75,29 @@ namespace stl2glb {
 
         return escaped.str();
     }
+
+    // Versione moderna di SHA256 usando EVP
     std::string SimpleMinioClient::sha256(const std::string& data) {
-        unsigned char hash[SHA256_DIGEST_LENGTH];
-        SHA256_CTX sha256;
-        SHA256_Init(&sha256);
-        SHA256_Update(&sha256, data.c_str(), data.size());
-        SHA256_Final(hash, &sha256);
-
-        std::stringstream ss;
-        for(int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
-            ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+        EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+        if (!ctx) {
+            throw std::runtime_error("Failed to create hash context");
         }
-        return ss.str();
-    }
 
-    std::string SimpleMinioClient::hmacSha256(const std::string& key, const std::string& data) {
-        unsigned char hash[SHA256_DIGEST_LENGTH];
+        std::unique_ptr<EVP_MD_CTX, decltype(&EVP_MD_CTX_free)> ctxPtr(ctx, EVP_MD_CTX_free);
+
+        if (EVP_DigestInit_ex(ctx, EVP_sha256(), nullptr) != 1) {
+            throw std::runtime_error("Failed to initialize SHA256");
+        }
+
+        if (EVP_DigestUpdate(ctx, data.c_str(), data.size()) != 1) {
+            throw std::runtime_error("Failed to update SHA256");
+        }
+
+        unsigned char hash[EVP_MAX_MD_SIZE];
         unsigned int hashLen;
-
-        HMAC(EVP_sha256(), key.c_str(), key.length(),
-             (unsigned char*)data.c_str(), data.length(),
-             hash, &hashLen);
+        if (EVP_DigestFinal_ex(ctx, hash, &hashLen) != 1) {
+            throw std::runtime_error("Failed to finalize SHA256");
+        }
 
         std::stringstream ss;
         for(unsigned int i = 0; i < hashLen; i++) {
@@ -103,13 +106,81 @@ namespace stl2glb {
         return ss.str();
     }
 
-    std::vector<unsigned char> SimpleMinioClient::hmacSha256Raw(const std::string& key, const std::string& data) {
-        std::vector<unsigned char> hash(SHA256_DIGEST_LENGTH);
-        unsigned int hashLen;
+    // Versione moderna di HMAC usando EVP
+    std::string SimpleMinioClient::hmacSha256(const std::string& key, const std::string& data) {
+        EVP_MAC* mac = EVP_MAC_fetch(nullptr, "HMAC", nullptr);
+        if (!mac) {
+            throw std::runtime_error("Failed to fetch HMAC");
+        }
 
-        HMAC(EVP_sha256(), key.c_str(), key.length(),
-             (unsigned char*)data.c_str(), data.length(),
-             hash.data(), &hashLen);
+        std::unique_ptr<EVP_MAC, decltype(&EVP_MAC_free)> macPtr(mac, EVP_MAC_free);
+
+        EVP_MAC_CTX* ctx = EVP_MAC_CTX_new(mac);
+        if (!ctx) {
+            throw std::runtime_error("Failed to create HMAC context");
+        }
+
+        std::unique_ptr<EVP_MAC_CTX, decltype(&EVP_MAC_CTX_free)> ctxPtr(ctx, EVP_MAC_CTX_free);
+
+        OSSL_PARAM params[] = {
+                OSSL_PARAM_construct_utf8_string("digest", const_cast<char*>("SHA256"), 0),
+                OSSL_PARAM_construct_end()
+        };
+
+        if (EVP_MAC_init(ctx, reinterpret_cast<const unsigned char*>(key.c_str()), key.length(), params) != 1) {
+            throw std::runtime_error("Failed to initialize HMAC");
+        }
+
+        if (EVP_MAC_update(ctx, reinterpret_cast<const unsigned char*>(data.c_str()), data.length()) != 1) {
+            throw std::runtime_error("Failed to update HMAC");
+        }
+
+        unsigned char hash[EVP_MAX_MD_SIZE];
+        size_t hashLen;
+        if (EVP_MAC_final(ctx, hash, &hashLen, sizeof(hash)) != 1) {
+            throw std::runtime_error("Failed to finalize HMAC");
+        }
+
+        std::stringstream ss;
+        for(size_t i = 0; i < hashLen; i++) {
+            ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+        }
+        return ss.str();
+    }
+
+    std::vector<unsigned char> SimpleMinioClient::hmacSha256Raw(const std::string& key, const std::string& data) {
+        EVP_MAC* mac = EVP_MAC_fetch(nullptr, "HMAC", nullptr);
+        if (!mac) {
+            throw std::runtime_error("Failed to fetch HMAC");
+        }
+
+        std::unique_ptr<EVP_MAC, decltype(&EVP_MAC_free)> macPtr(mac, EVP_MAC_free);
+
+        EVP_MAC_CTX* ctx = EVP_MAC_CTX_new(mac);
+        if (!ctx) {
+            throw std::runtime_error("Failed to create HMAC context");
+        }
+
+        std::unique_ptr<EVP_MAC_CTX, decltype(&EVP_MAC_CTX_free)> ctxPtr(ctx, EVP_MAC_CTX_free);
+
+        OSSL_PARAM params[] = {
+                OSSL_PARAM_construct_utf8_string("digest", const_cast<char*>("SHA256"), 0),
+                OSSL_PARAM_construct_end()
+        };
+
+        if (EVP_MAC_init(ctx, reinterpret_cast<const unsigned char*>(key.c_str()), key.length(), params) != 1) {
+            throw std::runtime_error("Failed to initialize HMAC");
+        }
+
+        if (EVP_MAC_update(ctx, reinterpret_cast<const unsigned char*>(data.c_str()), data.length()) != 1) {
+            throw std::runtime_error("Failed to update HMAC");
+        }
+
+        std::vector<unsigned char> hash(EVP_MAX_MD_SIZE);
+        size_t hashLen;
+        if (EVP_MAC_final(ctx, hash.data(), &hashLen, hash.size()) != 1) {
+            throw std::runtime_error("Failed to finalize HMAC");
+        }
 
         hash.resize(hashLen);
         return hash;
@@ -225,6 +296,7 @@ namespace stl2glb {
         return headers;
     }
 
+    // Le altre funzioni rimangono identiche...
     void SimpleMinioClient::download(const std::string& bucket,
                                      const std::string& objectName,
                                      const std::string& localPath) {

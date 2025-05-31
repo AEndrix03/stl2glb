@@ -305,9 +305,15 @@ namespace stl2glb {
                     ptr += 12;
                     skipWhitespace(ptr);
 
-                    fastParseFloat(ptr, currentTriangle.normal[0]);
-                    fastParseFloat(ptr, currentTriangle.normal[1]);
-                    fastParseFloat(ptr, currentTriangle.normal[2]);
+                    // FIX: Usa variabili temporanee per evitare binding di campi packed
+                    float nx, ny, nz;
+                    fastParseFloat(ptr, nx);
+                    fastParseFloat(ptr, ny);
+                    fastParseFloat(ptr, nz);
+
+                    currentTriangle.normal[0] = nx;
+                    currentTriangle.normal[1] = ny;
+                    currentTriangle.normal[2] = nz;
 
                     inFacet = true;
                     vertexCount = 0;

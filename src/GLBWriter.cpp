@@ -302,7 +302,8 @@ namespace stl2glb {
         draco::Status status = encoder.EncodeMeshToBuffer(mesh, &buffer);
 
         if (!status.ok()) {
-            throw std::runtime_error("Draco compression failed: " + status.error_msg());
+            // FIX: Concatenazione stringa corretta
+            throw std::runtime_error(std::string("Draco compression failed: ") + status.error_msg());
         }
 
         // Copia dati compressi
@@ -375,12 +376,12 @@ namespace stl2glb {
             prim.mode = TINYGLTF_MODE_TRIANGLES;
             prim.material = 0;
 
-            // Aggiungi estensione Draco
-            tinygltf::Value dracoExt(tinygltf::Value::Object());
+            // FIX: Inizializzazione corretta di tinygltf::Value
+            tinygltf::Value dracoExt{tinygltf::Value::Object{}};
             dracoExt.Get<tinygltf::Value::Object>()["bufferView"] =
                 tinygltf::Value(static_cast<int>(model.bufferViews.size() - 1));
 
-            tinygltf::Value attributes(tinygltf::Value::Object());
+            tinygltf::Value attributes{tinygltf::Value::Object{}};
             attributes.Get<tinygltf::Value::Object>()["POSITION"] = tinygltf::Value(0);
             attributes.Get<tinygltf::Value::Object>()["NORMAL"] = tinygltf::Value(1);
             dracoExt.Get<tinygltf::Value::Object>()["attributes"] = attributes;

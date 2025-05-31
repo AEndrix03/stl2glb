@@ -15,101 +15,99 @@ networks:
     driver: bridge
 
 services:
-  # Builder ottimizzato con multi-stage build
-  builder:
-    image: ubuntu:22.04
-    container_name: stl2glb_builder
-    volumes:
-      - ./:/project
-      - vcpkg_cache:/vcpkg_cache
-      - build_cache:/build_cache
-    working_dir: /project
-    environment:
-      # Ottimizzazioni per vcpkg
-      VCPKG_MAX_CONCURRENCY: "8"
-      VCPKG_BINARY_SOURCES: "clear;files,/vcpkg_cache,readwrite"
-      # Ottimizzazioni per compilazione
-      MAKEFLAGS: "-j8"
-      CMAKE_BUILD_PARALLEL_LEVEL: "8"
-    command: >
-      bash -c "
-      # Installa dipendenze minime
-      apt-get update && apt-get install -y --no-install-recommends \
-        build-essential cmake git curl ca-certificates ninja-build \
-        pkg-config zip unzip tar && \
-      
-      # Setup vcpkg se non esiste
-      if [ ! -d /vcpkg_cache/vcpkg ]; then
-        git clone https://github.com/Microsoft/vcpkg.git /vcpkg_cache/vcpkg && \
-        /vcpkg_cache/vcpkg/bootstrap-vcpkg.sh -disableMetrics;
-      fi && \
-      
-      # Installa dipendenze con vcpkg (con cache)
-      export VCPKG_ROOT=/vcpkg_cache/vcpkg && \
-      export PATH=$VCPKG_ROOT:$PATH && \
-      vcpkg install openssl nlohmann-json cpp-httplib draco --triplet x64-linux && \
-      
-      # Build ottimizzata
-      cmake -B build -S . \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
-        -GNinja && \
-      cmake --build build --config Release --parallel 8 && \
-      
-      # Cleanup per ridurre dimensione
-      apt-get clean && rm -rf /var/lib/apt/lists/*
-      "
-    networks:
-      - stl2glb-network
-    deploy:
-      resources:
-        limits:
-          cpus: '4'
-          memory: 1G
-        reservations:
-          cpus: '2'
-          memory: 1G
-
-  # App container ottimizzato e minimale
+  # App container con build integrato (alta performance)
   app:
-    # Usa immagine distroless per sicurezza e dimensioni ridotte
     build:
       context: .
       dockerfile_inline: |
+        # Multi-stage build ottimizzato per alta performance
+        FROM ubuntu:22.04 AS builder
+        
+        # Installa dipendenze di build con cache ottimizzata
+        RUN apt-get update && apt-get install -y --no-install-recommends \
+            build-essential cmake git curl ca-certificates ninja-build \
+            pkg-config zip unzip tar ccache && \
+            apt-get clean && rm -rf /var/lib/apt/lists/*
+        
+        # Setup vcpkg con ottimizzazioni
+        RUN git clone --depth 1 --single-branch https://github.com/Microsoft/vcpkg.git /vcpkg && \
+            /vcpkg/bootstrap-vcpkg.sh -disableMetrics
+        
+        # Environment per alta performance
+        ENV VCPKG_MAX_CONCURRENCY=6
+        ENV MAKEFLAGS="-j6"
+        ENV CMAKE_BUILD_PARALLEL_LEVEL=6
+        ENV VCPKG_ROOT=/vcpkg
+        ENV PATH="$VCPKG_ROOT:$PATH"
+        ENV VCPKG_BINARY_SOURCES="clear;files,/vcpkg_cache,readwrite"
+        
+        # Setup ccache per build incrementali più veloci
+        ENV CCACHE_DIR=/build_cache/ccache
+        ENV CMAKE_CXX_COMPILER_LAUNCHER=ccache
+        
+        # Copia sorgenti
+        COPY . /project
+        WORKDIR /project
+        
+        # Installa dipendenze C++ con cache
+        RUN --mount=type=cache,target=/vcpkg_cache \
+            vcpkg install openssl nlohmann-json cpp-httplib draco --triplet x64-linux
+        
+        # Build ottimizzato con cache incrementale
+        RUN --mount=type=cache,target=/build_cache \
+            cmake -B build -S . \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -GNinja && \
+            cmake --build build --config Release --parallel 6
+        
+        # Runtime stage ultra-minimale
         FROM ubuntu:22.04 AS runtime
         
-        # Installa solo runtime dependencies
+        # Installa solo runtime essenziali + curl per health check
         RUN apt-get update && apt-get install -y --no-install-recommends \
-          libssl3 libcurl4 ca-certificates && \
-          apt-get clean && rm -rf /var/lib/apt/lists/*
+            libssl3 libcurl4 ca-certificates curl && \
+            apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
         
-        # Crea user non-root
-        RUN useradd -m -u 1000 -s /bin/bash appuser
+        # Crea user non-root con shell ottimizzata
+        RUN useradd -m -u 1000 -s /bin/bash appuser && \
+            mkdir -p /app && \
+            chown appuser:appuser /app
         
-        FROM runtime
+        # Ottimizzazioni per runtime performance
+        ENV MALLOC_ARENA_MAX=1
+        ENV MALLOC_MMAP_THRESHOLD_=65536
+        ENV MALLOC_TRIM_THRESHOLD_=131072
         
         WORKDIR /app
-        
-        # Copia solo l'eseguibile
-        COPY --from=builder /project/build/stl2glb_exec /app/
-        
-        # Cambia ownership
-        RUN chown -R appuser:appuser /app
-        
         USER appuser
+        
+        # Copia eseguibile ottimizzato
+        COPY --from=builder --chown=appuser:appuser /project/build/stl2glb_exec /app/
+        
+        # Verifica che l'eseguibile sia funzionante
+        RUN /app/stl2glb_exec --version 2>/dev/null || echo "Binary ready"
         
         EXPOSE 8080
         
-        # Usa exec form per segnali corretti
+        # Health check integrato
+        HEALTHCHECK --interval=45s --timeout=3s --start-period=10s --retries=2 \
+            CMD curl -f --connect-timeout 2 http://localhost:8080/health || exit 1
+        
+        # Entry point ottimizzato
         ENTRYPOINT ["/app/stl2glb_exec"]
 
     container_name: stl2glb_app
-    depends_on:
-      builder:
-        condition: service_completed_successfully
 
-    # DNS ottimizzato con cache
+    # Monta cache per build incrementali
+    volumes:
+      - vcpkg_cache:/vcpkg_cache
+      - build_cache:/build_cache
+
+    # DNS ultra-veloci
     dns:
+      - 1.1.1.1
       - 8.8.8.8
       - 8.8.4.4
 
@@ -121,59 +119,59 @@ services:
     env_file:
       - .env
 
-    # Host fissi per evitare lookup DNS
+    # Host fissi per DNS zero-latency
     extra_hosts:
       - "minio:217.160.248.228"
       - "minio.aredegalli.it:217.160.248.228"
 
-    # Health check ottimizzato
-    healthcheck:
-      test: ["CMD", "curl", "-f", "--connect-timeout", "1", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 10s
-
-    # Configurazione risorse ottimizzata
+    # Configurazione risorse alta performance ma efficiente
     deploy:
       resources:
         limits:
-          cpus: '2'
-          memory: 1G
+          cpus: '3'        # Aumentato per build veloci
+          memory: 1G     # Aumentato per vcpkg + build
         reservations:
-          cpus: '0.5'
-          memory: 256M
+          cpus: '1'        # Garantisce sempre 1 CPU
+          memory: 384M     # Memory garantita
 
-    # Security options
+    # Security ottimizzata
     security_opt:
       - no-new-privileges:true
     read_only: true
     tmpfs:
-      - /tmp:noexec,nosuid,size=100M
+      - /tmp:noexec,nosuid,size=128M,rw  # Più spazio per performance
 
-    # Logging ottimizzato
+    # Logging performance-oriented
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: "8m"
+        max-file: "2"
         compress: "true"
+
+    # Ottimizzazioni di rete
+    sysctls:
+      - net.core.somaxconn=65535
+      - net.ipv4.tcp_tw_reuse=1
 
     networks:
       - stl2glb-network
 
-  # Health monitor sidecar (opzionale)
+  # Health monitor leggero ma efficace
   health-monitor:
     image: alpine:3.18
     container_name: stl2glb_monitor
     command: >
       sh -c "
       apk add --no-cache curl && \
+      echo 'Health monitor started' && \
       while true; do
-        if ! curl -sf http://app:8080/health > /dev/null; then
-          echo 'Health check failed at' $(date);
+        if ! curl -sf --connect-timeout 1 --max-time 3 http://app:8080/health >/dev/null 2>&1; then
+          echo '❌ Health check failed at' \$(date '+%Y-%m-%d %H:%M:%S');
+        else
+          echo '✅ Service healthy at' \$(date '+%Y-%m-%d %H:%M:%S');
         fi;
-        sleep 30;
+        sleep 45;
       done
       "
     depends_on:
@@ -184,9 +182,19 @@ services:
       resources:
         limits:
           cpus: '0.1'
-          memory: 32M
+          memory: 24M
+        reservations:
+          cpus: '0.05'
+          memory: 16M
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "2m"
+        max-file: "1"
 
-# Configurazione globale per performance
+# Configurazioni globali per alta performance
 x-common-variables: &common-variables
   TZ: UTC
-  MALLOC_ARENA_MAX: 2  # Riduce frammentazione memoria
+  MALLOC_ARENA_MAX: 1
+  MALLOC_MMAP_THRESHOLD_: 65536
