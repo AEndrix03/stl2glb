@@ -40,7 +40,6 @@ services:
     container_name: stl2glb_app
     depends_on:
       - builder
-      - init-minio
     volumes:
       - ./:/project
     working_dir: /project
