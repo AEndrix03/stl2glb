@@ -205,4 +205,8 @@ namespace stl2glb {
 
     void MinioClient::upload(const std::string& bucket,
                              const std::string& objectName,
-                             const std::s
+                             const std::string& localPath) {
+        MinioClientImpl::getInstance().upload(bucket, objectName, localPath);
+    }
+
+} // namespace stl2glb
