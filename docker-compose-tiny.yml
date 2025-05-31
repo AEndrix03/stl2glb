@@ -1,30 +1,88 @@
 version: "3.8"
 
+volumes:
+  vcpkg_installed:
+    driver: local
+  build_cache:
+    driver: local
+
 networks:
   stl2glb-network:
     driver: bridge
 
 services:
+  # Setup vcpkg una tantum (esegue solo se necessario)
+  vcpkg-setup:
+    image: ubuntu:22.04
+    container_name: stl2glb_vcpkg_setup
+    volumes:
+      - vcpkg_installed:/vcpkg_external
+    command: >
+      bash -c "
+      # Controlla se vcpkg è già installato
+      if [ ! -f /vcpkg_external/vcpkg ]; then
+        echo '📦 Setting up vcpkg for the first time...'
+        apt-get update && apt-get install -y --no-install-recommends \
+          build-essential cmake git curl ca-certificates ninja-build \
+          pkg-config zip unzip tar && \
+        git clone --depth 1 https://github.com/Microsoft/vcpkg.git /tmp/vcpkg && \
+        cd /tmp/vcpkg && ./bootstrap-vcpkg.sh -disableMetrics && \
+        cp -r /tmp/vcpkg/* /vcpkg_external/ && \
+        echo '✅ vcpkg setup completed'
+      else
+        echo '✅ vcpkg already installed, skipping setup'
+      fi
+      "
+    profiles:
+      - setup
+
+  # Installa dipendenze vcpkg (esegue solo se necessario)
+  vcpkg-install:
+    image: ubuntu:22.04
+    container_name: stl2glb_vcpkg_install
+    volumes:
+      - vcpkg_installed:/vcpkg_external
+    environment:
+      VCPKG_ROOT: /vcpkg_external
+      VCPKG_MAX_CONCURRENCY: "2"
+    command: >
+      bash -c "
+      # Controlla se le dipendenze sono già installate
+      if [ ! -d /vcpkg_external/installed/x64-linux ]; then
+        echo '📚 Installing C++ dependencies...'
+        apt-get update && apt-get install -y --no-install-recommends \
+          build-essential cmake git curl ca-certificates ninja-build \
+          pkg-config zip unzip tar && \
+        export PATH=/vcpkg_external:\$PATH && \
+        vcpkg install openssl nlohmann-json cpp-httplib draco --triplet x64-linux && \
+        echo '✅ Dependencies installed'
+      else
+        echo '✅ Dependencies already installed, skipping'
+      fi
+      "
+    depends_on:
+      vcpkg-setup:
+        condition: service_completed_successfully
+    profiles:
+      - setup
+
+  # App principale (build veloce)
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-external-vcpkg
     container_name: stl2glb_app
-
+    volumes:
+      - vcpkg_installed:/vcpkg_external:ro
+      - build_cache:/build_cache
     ports:
       - "9002:8080"
-
     restart: unless-stopped
-
     env_file:
       - .env
-
-    # Host fissi per evitare lookup DNS
     extra_hosts:
       - "minio:217.160.248.228"
       - "minio.aredegalli.it:217.160.248.228"
-
-    # Risorse ridotte per VPS
     deploy:
       resources:
         limits:
@@ -33,24 +91,24 @@ services:
         reservations:
           cpus: '0.25'
           memory: 128M
-
-    # Security options
     security_opt:
       - no-new-privileges:true
     read_only: true
     tmpfs:
       - /tmp:noexec,nosuid,size=50M
-
-    # Logging ottimizzato
     logging:
       driver: "json-file"
       options:
         max-size: "5m"
         max-file: "2"
         compress: "true"
-
     networks:
       - stl2glb-network
+    depends_on:
+      vcpkg-install:
+        condition: service_completed_successfully
+    profiles:
+      - app
 
 # Configurazione globale
 x-common-variables: &common-variables
