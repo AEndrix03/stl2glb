@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <string.h>
 #include <vector>
+#include <sstream>
+#include <openssl/sha.h>
 
 namespace stl2glb {
 
@@ -25,7 +27,7 @@ namespace stl2glb {
         accessKey = env.getMinioAccessKey();
         secretKey = env.getMinioSecretKey();
 
-        // Log per debug
+        // Log per info
         Logger::info("Initializing SimpleMinioClient with endpoint: " + endpoint);
         Logger::info("Access Key length: " + std::to_string(accessKey.length()));
         Logger::info("Secret Key length: " + std::to_string(secretKey.length()));
@@ -49,6 +51,180 @@ namespace stl2glb {
         initialized = true;
     }
 
+    // Funzione helper per URL encoding
+    std::string SimpleMinioClient::urlEncode(const std::string& value, bool encodeSlash) {
+        std::ostringstream escaped;
+        escaped.fill('0');
+        escaped << std::hex;
+
+        for (std::string::const_iterator i = value.begin(), n = value.end(); i != n; ++i) {
+            std::string::value_type c = (*i);
+
+            // Keep alphanumeric and other accepted characters intact
+            if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~' || (!encodeSlash && c == '/')) {
+                escaped << c;
+                continue;
+            }
+
+            // Any other characters are percent-encoded
+            escaped << std::uppercase;
+            escaped << '%' << std::setw(2) << int((unsigned char) c);
+            escaped << std::nouppercase;
+        }
+
+        return escaped.str();
+    }
+    std::string SimpleMinioClient::sha256(const std::string& data) {
+        unsigned char hash[SHA256_DIGEST_LENGTH];
+        SHA256_CTX sha256;
+        SHA256_Init(&sha256);
+        SHA256_Update(&sha256, data.c_str(), data.size());
+        SHA256_Final(hash, &sha256);
+
+        std::stringstream ss;
+        for(int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+            ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+        }
+        return ss.str();
+    }
+
+    std::string SimpleMinioClient::hmacSha256(const std::string& key, const std::string& data) {
+        unsigned char hash[SHA256_DIGEST_LENGTH];
+        unsigned int hashLen;
+
+        HMAC(EVP_sha256(), key.c_str(), key.length(),
+             (unsigned char*)data.c_str(), data.length(),
+             hash, &hashLen);
+
+        std::stringstream ss;
+        for(unsigned int i = 0; i < hashLen; i++) {
+            ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+        }
+        return ss.str();
+    }
+
+    std::vector<unsigned char> SimpleMinioClient::hmacSha256Raw(const std::string& key, const std::string& data) {
+        std::vector<unsigned char> hash(SHA256_DIGEST_LENGTH);
+        unsigned int hashLen;
+
+        HMAC(EVP_sha256(), key.c_str(), key.length(),
+             (unsigned char*)data.c_str(), data.length(),
+             hash.data(), &hashLen);
+
+        hash.resize(hashLen);
+        return hash;
+    }
+
+    std::string SimpleMinioClient::getAmzDate() {
+        auto now = std::chrono::system_clock::now();
+        auto time_t = std::chrono::system_clock::to_time_t(now);
+        std::tm* tm = std::gmtime(&time_t);
+
+        char buffer[17];
+        std::strftime(buffer, sizeof(buffer), "%Y%m%dT%H%M%SZ", tm);
+        return std::string(buffer);
+    }
+
+    std::string SimpleMinioClient::getDateStamp() {
+        auto now = std::chrono::system_clock::now();
+        auto time_t = std::chrono::system_clock::to_time_t(now);
+        std::tm* tm = std::gmtime(&time_t);
+
+        char buffer[9];
+        std::strftime(buffer, sizeof(buffer), "%Y%m%d", tm);
+        return std::string(buffer);
+    }
+
+    httplib::Headers SimpleMinioClient::createAwsV4Headers(
+            const std::string& method,
+            const std::string& path,
+            const std::string& payload,
+            const std::string& contentType) {
+
+        // Estrai host completo dall'endpoint (inclusa la porta per MinIO)
+        std::string fullHost = endpoint;
+        if (fullHost.find("http://") == 0) {
+            fullHost = fullHost.substr(7);
+        } else if (fullHost.find("https://") == 0) {
+            fullHost = fullHost.substr(8);
+        }
+
+        httplib::Headers headers;
+
+        // AWS V4 richiede questi headers
+        std::string amzDate = getAmzDate();
+        std::string dateStamp = getDateStamp();
+        std::string payloadHash = sha256(payload);
+
+        // IMPORTANTE: Per MinIO, usa l'host completo con porta
+        headers.emplace("Host", fullHost);
+        headers.emplace("x-amz-date", amzDate);
+        headers.emplace("x-amz-content-sha256", payloadHash);
+        headers.emplace("User-Agent", "SimpleMinioClient/1.0");
+
+        if (!contentType.empty()) {
+            headers.emplace("Content-Type", contentType);
+        }
+        if (!payload.empty()) {
+            headers.emplace("Content-Length", std::to_string(payload.size()));
+        }
+
+        // URL encode del path per la canonical request
+        // Mantieni il path così com'è per MinIO (non fare l'encode degli slash)
+        std::string canonicalUri = path;
+
+        // Crea la canonical request usando l'host completo con porta
+        std::string canonicalHeaders = "host:" + fullHost + "\n" +
+                                       "x-amz-content-sha256:" + payloadHash + "\n" +
+                                       "x-amz-date:" + amzDate + "\n";
+
+        std::string signedHeaders = "host;x-amz-content-sha256;x-amz-date";
+
+        std::string canonicalRequest = method + "\n" +
+                                       canonicalUri + "\n" +
+                                       "\n" +  // query string vuoto
+                                       canonicalHeaders + "\n" +
+                                       signedHeaders + "\n" +
+                                       payloadHash;
+
+        // Log per info (commentare in produzione)
+        Logger::info("Canonical Request:\n" + canonicalRequest);
+
+        // Crea la string to sign
+        std::string algorithm = "AWS4-HMAC-SHA256";
+        std::string credentialScope = dateStamp + "/us-east-1/s3/aws4_request";
+        std::string hashedCanonicalRequest = sha256(canonicalRequest);
+
+        std::string stringToSign = algorithm + "\n" +
+                                   amzDate + "\n" +
+                                   credentialScope + "\n" +
+                                   hashedCanonicalRequest;
+
+        Logger::info("String to Sign:\n" + stringToSign);
+
+        // Calcola la signing key
+        std::string kSecret = "AWS4" + secretKey;
+        auto kDate = hmacSha256Raw(kSecret, dateStamp);
+        auto kRegion = hmacSha256Raw(std::string(kDate.begin(), kDate.end()), "us-east-1");
+        auto kService = hmacSha256Raw(std::string(kRegion.begin(), kRegion.end()), "s3");
+        auto kSigning = hmacSha256Raw(std::string(kService.begin(), kService.end()), "aws4_request");
+
+        // Calcola la signature
+        std::string signature = hmacSha256(std::string(kSigning.begin(), kSigning.end()), stringToSign);
+
+        Logger::info("Signature: " + signature);
+
+        // Crea l'authorization header
+        std::string authorizationHeader = algorithm + " " +
+                                          "Credential=" + accessKey + "/" + credentialScope + ", " +
+                                          "SignedHeaders=" + signedHeaders + ", " +
+                                          "Signature=" + signature;
+
+        headers.emplace("Authorization", authorizationHeader);
+
+        return headers;
+    }
+
     void SimpleMinioClient::download(const std::string& bucket,
                                      const std::string& objectName,
                                      const std::string& localPath) {
@@ -59,11 +235,10 @@ namespace stl2glb {
 
             Logger::info("Downloading object: " + objectName + " from bucket: " + bucket);
 
-            // Assicurati che il bucket esista
-            if (!ensureBucketExists(bucket)) {
-                Logger::warn("Bucket does not exist: " + bucket);
-                Logger::info("Attempting to create bucket: " + bucket);
-                createBucket(bucket);
+            // Verifica che il nome del bucket non contenga underscore all'inizio o alla fine
+            if (bucket.empty() || bucket[0] == '_' || bucket[bucket.length()-1] == '_') {
+                Logger::error("Invalid bucket name format: " + bucket);
+                throw std::runtime_error("Invalid bucket name format");
             }
 
             // Estrai host e porta dall'endpoint
@@ -82,29 +257,41 @@ namespace stl2glb {
                 host = host.substr(0, colonPos);
             }
 
+            Logger::info("Connecting to " + host + ":" + port);
+
             // Crea il client HTTP
             httplib::Client cli(host, std::stoi(port));
+            cli.set_connection_timeout(30);
+            cli.set_read_timeout(30);
 
-            // Imposta headers
-            httplib::Headers headers;
-            std::string date = getISO8601Date();
-            std::string signature = signRequest("GET", bucket, objectName, "", date);
+            // Prepara la richiesta con AWS V4 signature
+            std::string path = "/" + bucket + "/" + objectName;
+            Logger::info("Request path: " + path);
 
-            headers.emplace("Authorization", "AWS " + accessKey + ":" + signature);
-            headers.emplace("Date", date);
+            auto headers = createAwsV4Headers("GET", path, "", "");
+
+            // Log headers per info
+            for (const auto& header : headers) {
+                Logger::info("Header: " + header.first + " = " + header.second);
+            }
 
             // Esegui la richiesta
-            std::string path = "/" + bucket + "/" + objectName;
             auto res = cli.Get(path.c_str(), headers);
 
             if (!res) {
-                Logger::error("HTTP error: " + std::to_string(res->status));
-                throw std::runtime_error("HTTP error: " + std::to_string(res->status));
+                Logger::error("HTTP connection error");
+                throw std::runtime_error("HTTP connection error");
             }
 
             if (res->status != 200) {
                 Logger::error("Download failed with status: " + std::to_string(res->status));
                 Logger::error("Response: " + res->body);
+
+                // Log response headers per info
+                for (const auto& header : res->headers) {
+                    Logger::info("Response Header: " + header.first + " = " + header.second);
+                }
+
                 throw std::runtime_error("Download failed with status: " + std::to_string(res->status));
             }
 
@@ -134,13 +321,6 @@ namespace stl2glb {
                 std::string error = "File not found for upload: " + localPath;
                 Logger::error(error);
                 throw std::runtime_error(error);
-            }
-
-            // Assicurati che il bucket esista
-            if (!ensureBucketExists(bucket)) {
-                Logger::warn("Bucket does not exist for upload: " + bucket);
-                Logger::info("Attempting to create bucket: " + bucket);
-                createBucket(bucket);
             }
 
             // Log della dimensione del file
@@ -176,25 +356,20 @@ namespace stl2glb {
 
             // Crea il client HTTP
             httplib::Client cli(host, std::stoi(port));
+            cli.set_connection_timeout(30);
+            cli.set_read_timeout(30);
 
-            // Imposta headers
-            httplib::Headers headers;
+            // Prepara la richiesta con AWS V4 signature
+            std::string path = "/" + bucket + "/" + objectName;
             std::string contentType = "model/gltf-binary";
-            std::string date = getISO8601Date();
-            std::string signature = signRequest("PUT", bucket, objectName, contentType, date);
-
-            headers.emplace("Authorization", "AWS " + accessKey + ":" + signature);
-            headers.emplace("Date", date);
-            headers.emplace("Content-Type", contentType);
-            headers.emplace("Content-Length", std::to_string(fileContent.size()));
+            auto headers = createAwsV4Headers("PUT", path, fileContent, contentType);
 
             // Esegui la richiesta
-            std::string path = "/" + bucket + "/" + objectName;
             auto res = cli.Put(path.c_str(), headers, fileContent, contentType);
 
             if (!res) {
-                Logger::error("HTTP error: " + std::to_string(res->status));
-                throw std::runtime_error("HTTP error: " + std::to_string(res->status));
+                Logger::error("HTTP connection error");
+                throw std::runtime_error("HTTP connection error");
             }
 
             if (res->status != 200 && res->status != 204) {
@@ -232,21 +407,17 @@ namespace stl2glb {
 
             // Crea il client HTTP
             httplib::Client cli(host, std::stoi(port));
+            cli.set_connection_timeout(10);
 
-            // Imposta headers
-            httplib::Headers headers;
-            std::string date = getISO8601Date();
-            std::string signature = signRequest("GET", bucketName, "", "", date);
-
-            headers.emplace("Authorization", "AWS " + accessKey + ":" + signature);
-            headers.emplace("Date", date);
+            // Prepara la richiesta con AWS V4 signature
+            std::string path = "/" + bucketName;
+            auto headers = createAwsV4Headers("HEAD", path, "", "");
 
             // Esegui la richiesta
-            std::string path = "/" + bucketName;
             auto res = cli.Head(path.c_str(), headers);
 
             if (!res) {
-                Logger::warn("HTTP error: " + std::to_string(res->status));
+                Logger::warn("HTTP connection error");
                 return false;
             }
 
@@ -288,21 +459,17 @@ namespace stl2glb {
 
             // Crea il client HTTP
             httplib::Client cli(host, std::stoi(port));
+            cli.set_connection_timeout(10);
 
-            // Imposta headers
-            httplib::Headers headers;
-            std::string date = getISO8601Date();
-            std::string signature = signRequest("PUT", bucketName, "", "", date);
-
-            headers.emplace("Authorization", "AWS " + accessKey + ":" + signature);
-            headers.emplace("Date", date);
+            // Prepara la richiesta con AWS V4 signature
+            std::string path = "/" + bucketName;
+            auto headers = createAwsV4Headers("PUT", path, "", "");
 
             // Esegui la richiesta
-            std::string path = "/" + bucketName;
             auto res = cli.Put(path.c_str(), headers, "", "");
 
             if (!res) {
-                Logger::error("HTTP error: " + std::to_string(res->status));
+                Logger::error("HTTP connection error");
                 return false;
             }
 
@@ -318,70 +485,6 @@ namespace stl2glb {
             Logger::warn("Exception in createBucket: " + std::string(e.what()));
             return false;
         }
-    }
-
-    std::string SimpleMinioClient::signRequest(const std::string& method,
-                                               const std::string& bucket,
-                                               const std::string& objectName,
-                                               const std::string& contentType,
-                                               const std::string& date) {
-        // Implementazione semplificata della firma S3
-        std::string stringToSign = method + "\n"
-                                   + "\n"  // MD5
-                                   + contentType + "\n"
-                                   + date + "\n"
-                                   + "/" + bucket;
-
-        if (!objectName.empty()) {
-            stringToSign += "/" + objectName;
-        }
-
-        // Firma HMAC-SHA1
-        unsigned char digest[EVP_MAX_MD_SIZE];
-        unsigned int digestLength = 0;
-
-        HMAC(EVP_sha1(), secretKey.c_str(), secretKey.length(),
-             (unsigned char*)stringToSign.c_str(), stringToSign.length(),
-             digest, &digestLength);
-
-        // Converti in Base64
-        std::string base64Signature;
-        base64Signature.resize(((digestLength + 2) / 3) * 4);
-
-        static const char base64Chars[] =
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-        size_t i = 0, j = 0;
-        for (; i < digestLength; i += 3) {
-            int val = (digest[i] << 16) |
-                      ((i + 1 < digestLength ? digest[i + 1] : 0) << 8) |
-                      (i + 2 < digestLength ? digest[i + 2] : 0);
-
-            base64Signature[j++] = base64Chars[(val >> 18) & 0x3F];
-            base64Signature[j++] = base64Chars[(val >> 12) & 0x3F];
-
-            if (i + 1 < digestLength) {
-                base64Signature[j++] = base64Chars[(val >> 6) & 0x3F];
-            } else {
-                base64Signature[j++] = '=';
-            }
-
-            if (i + 2 < digestLength) {
-                base64Signature[j++] = base64Chars[val & 0x3F];
-            } else {
-                base64Signature[j++] = '=';
-            }
-        }
-
-        return base64Signature;
-    }
-
-    std::string SimpleMinioClient::getISO8601Date() {
-        // Format: Wed, 28 Oct 2009 22:32:00 GMT
-        std::time_t now = std::time(nullptr);
-        char buf[100];
-        std::strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", std::gmtime(&now));
-        return std::string(buf);
     }
 
     void SimpleMinioClient::ensureDirectoryExists(const std::string& filePath) {
