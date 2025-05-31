@@ -43,10 +43,10 @@ services:
     command: >
       bash -c "
       apt-get update &&
-      apt-get install -y iputils-ping curl &&
+      apt-get install -y iputils-ping curl wget netcat-openbsd telnet &&
       echo 'Testing connectivity to MinIO...' &&
-      ping -c 4 217.160.248.228 &&
-      curl -v http://217.160.248.228:7800 &&
+      ping -c 4 minio.aredegalli.it &&
+      curl -v http://minio.aredegalli.it:7800 &&
       echo 'Starting application...' &&
       ./build/stl2glb_exec
       "

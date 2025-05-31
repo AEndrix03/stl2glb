@@ -53,18 +53,8 @@ namespace stl2glb {
             // Log per debug di connessione
             Logger::info("Testing connection to endpoint before initializing client...");
 
-            // Test di ping semplice (solo log)
-            try {
-                httplib::Client cli(endpoint);
-                auto res = cli.Get("/");
-                if (res) {
-                    Logger::info("Endpoint ping successful. Status: " + std::to_string(res->status));
-                } else {
-                    Logger::error("Endpoint ping failed: " + httplib::to_string(res.error()));
-                }
-            } catch (const std::exception& e) {
-                Logger::error("Exception during endpoint ping: " + std::string(e.what()));
-            }
+            // Non possiamo utilizzare httplib direttamente qui perché non è disponibile
+            // Procediamo comunque con la creazione del client MinIO
 
             minio::s3::BaseUrl baseUrl{endpoint};
 

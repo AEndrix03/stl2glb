@@ -75,41 +75,53 @@ namespace stl2glb {
             try {
                 Logger::info("Testing if endpoint is reachable: " + endpoint);
 
-                // Implementazione semplice con httplib
-                // Questo è solo un esempio, potrebbe essere necessario usare altra libreria
-                // o implementare un test più robusto
+                // Rimuovi protocollo se presente
+                std::string cleanEndpoint = endpoint;
+                if (cleanEndpoint.find("http://") == 0) {
+                    cleanEndpoint = cleanEndpoint.substr(7);
+                } else if (cleanEndpoint.find("https://") == 0) {
+                    cleanEndpoint = cleanEndpoint.substr(8);
+                }
 
-                // Estrai host e porta dall'endpoint
-                std::string host = endpoint;
+                // Estrai host e porta
+                std::string host;
                 int port = 80;
 
-                // Rimuovi http:// o https:// se presente
-                if (host.find("http://") == 0) {
-                    host = host.substr(7);
-                } else if (host.find("https://") == 0) {
-                    host = host.substr(8);
-                    port = 443;
-                }
-
-                // Estrai porta se specificata
-                size_t colonPos = host.find(":");
+                size_t colonPos = cleanEndpoint.find(":");
                 if (colonPos != std::string::npos) {
-                    port = std::stoi(host.substr(colonPos + 1));
-                    host = host.substr(0, colonPos);
-                }
-
-                // Usa httplib per verificare la connessione
-                httplib::Client cli(host, port);
-                cli.set_connection_timeout(timeout_ms / 1000); // Converte da ms a sec
-
-                auto res = cli.Get("/");
-                if (res) {
-                    Logger::info("Endpoint is reachable");
-                    return true;
+                    port = std::stoi(cleanEndpoint.substr(colonPos + 1));
+                    host = cleanEndpoint.substr(0, colonPos);
                 } else {
-                    Logger::error("Endpoint is not reachable: " + httplib::to_string(res.error()));
-                    return false;
+                    host = cleanEndpoint;
                 }
+
+                // Utilizziamo direttamente un socket per verificare la connessione
+                // anziché httplib che potrebbe non essere disponibile
+
+                // Creiamo un endpoint fittizio per Minio con credenziali vuote
+                // per verificare solo la connettività di base
+                minio::s3::BaseUrl baseUrl("http://" + host + ":" + std::to_string(port));
+                minio::creds::StaticProvider creds("", "");
+                minio::s3::Client client(baseUrl, &creds);
+
+                // Tentiamo un'operazione semplice come ListBuckets per verificare la connettività
+                minio::s3::ListBucketsArgs args;
+                auto result = client.ListBuckets(args);
+
+                // Non ci interessa se l'operazione è riuscita (probabilmente fallirà per credenziali),
+                // ma se siamo riusciti a stabilire una connessione
+                if (result.code == "AccessDenied" || result.code == "InvalidAccessKeyId") {
+                    // Questi errori indicano che il server è raggiungibile, ma le credenziali sono sbagliate
+                    Logger::info("Endpoint is reachable (auth failed but connection worked)");
+                    return true;
+                } else if (!result.message.empty()) {
+                    // Abbiamo ricevuto una risposta dal server
+                    Logger::info("Endpoint is reachable with response: " + result.code);
+                    return true;
+                }
+
+                Logger::error("Endpoint is not reachable: No valid response from server");
+                return false;
             } catch (const std::exception& e) {
                 Logger::error("Exception in endpoint reachability test: " + std::string(e.what()));
                 return false;
