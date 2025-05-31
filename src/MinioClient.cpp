@@ -40,13 +40,9 @@ namespace stl2glb {
 
             minio::s3::BaseUrl baseUrl{endpoint};
 
-            // Configurazione client con timeout più lunghi
-            minio::s3::ClientConfig config;
-            config.connect_timeout_ms = 30000;  // 30 secondi
-            config.read_timeout_ms = 30000;     // 30 secondi
-            config.ssl_cert_file = "";          // Nessun certificato SSL
-
-            client = std::make_shared<minio::s3::Client>(baseUrl, credentials.get(), config);
+            // Nella tua versione di minio-cpp non sembra esserci ClientConfig
+            // Creiamo il client senza configurazione aggiuntiva
+            client = std::make_shared<minio::s3::Client>(baseUrl, credentials.get());
 
             // Verifica che i bucket esistano e creali se necessario
             ensureBucketExists(env.getStlBucketName());
@@ -209,8 +205,4 @@ namespace stl2glb {
 
     void MinioClient::upload(const std::string& bucket,
                              const std::string& objectName,
-                             const std::string& localPath) {
-        MinioClientImpl::getInstance().upload(bucket, objectName, localPath);
-    }
-
-} // namespace stl2glb
+                             const std::s

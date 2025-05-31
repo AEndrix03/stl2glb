@@ -1,14 +1,14 @@
 #pragma once
 #include <string>
 #include <miniocpp/client.h>
-#include "./Logger.hpp"
+#include "stl2glb/Logger.hpp"
 
 namespace stl2glb {
 
 /**
  * @class MinioConnectionCheck
  * @brief Classe di utilità per verificare la connessione a MinIO
- * 
+ *
  * Fornisce metodi per verificare la connessione a un server MinIO
  * e diagnosticare eventuali problemi di connessione.
  */
@@ -39,14 +39,9 @@ namespace stl2glb {
                 // Crea credenziali
                 minio::creds::StaticProvider credentials(accessKey, secretKey);
 
-                // Configura il client
+                // Crea client (senza config che non è disponibile nella tua versione)
                 minio::s3::BaseUrl baseUrl{fullEndpoint};
-                minio::s3::ClientConfig config;
-                config.connect_timeout_ms = timeout_ms;
-                config.read_timeout_ms = timeout_ms;
-
-                // Crea client
-                minio::s3::Client client(baseUrl, &credentials, config);
+                minio::s3::Client client(baseUrl, &credentials);
 
                 // Tenta di elencare i bucket
                 minio::s3::ListBucketsArgs args;
