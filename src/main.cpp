@@ -6,6 +6,6 @@ int main() {
     env.init();
 
     stl2glb::Server server;
-    server.start(8080);
+    server.start(8081);
     return 0;
 }

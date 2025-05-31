@@ -244,3 +244,43 @@ events:
       Running the CXX compiler's linker: "E:/Jetbrains/CLion 2025.1/bin/mingw/bin/ld.exe" "-v"
       GNU ld (GNU Binutils) 2.40
 ...
+
+---
+events:
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Internal/CheckSourceCompiles.cmake:108 (try_compile)"
+      - "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/CheckCXXSourceCompiles.cmake:58 (cmake_check_source_compiles)"
+      - "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/FindThreads.cmake:99 (CHECK_CXX_SOURCE_COMPILES)"
+      - "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/FindThreads.cmake:163 (_threads_check_libc)"
+      - "D:/Progetti/vcpkg/scripts/buildsystems/vcpkg.cmake:893 (_find_package)"
+      - "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "D:/Progetti/vcpkg/installed/x64-windows/share/httplib/httplibConfig.cmake:39 (find_dependency)"
+      - "D:/Progetti/vcpkg/scripts/buildsystems/vcpkg.cmake:893 (_find_package)"
+      - "CMakeLists.txt:10 (find_package)"
+    checks:
+      - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
+    directories:
+      source: "D:/Progetti/stl2glb/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-edudaw"
+      binary: "D:/Progetti/stl2glb/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-edudaw"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      VCPKG_INSTALLED_DIR: "D:/Progetti/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/Progetti/vcpkg"
+    buildResult:
+      variable: "CMAKE_HAVE_LIBC_PTHREAD"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Progetti/stl2glb/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-edudaw'
+        
+        Run Build Command(s): "E:/Jetbrains/CLion 2025.1/bin/ninja/win/x64/ninja.exe" -v cmTC_02613
+        [1/2] "E:\\Jetbrains\\CLion 2025.1\\bin\\mingw\\bin\\g++.exe" -DCMAKE_HAVE_LIBC_PTHREAD  -std=gnu++17 -fdiagnostics-color=always -o CMakeFiles/cmTC_02613.dir/src.cxx.obj -c D:/Progetti/stl2glb/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-edudaw/src.cxx
+        [2/2] C:\\WINDOWS\\system32\\cmd.exe /C "cd . && "E:\\Jetbrains\\CLion 2025.1\\bin\\mingw\\bin\\g++.exe"   CMakeFiles/cmTC_02613.dir/src.cxx.obj -o cmTC_02613.exe -Wl,--out-implib,libcmTC_02613.dll.a -Wl,--major-image-version,0,--minor-image-version,0  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 && cd ."
+        
+      exitCode: 0
+...

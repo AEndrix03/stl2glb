@@ -10,7 +10,7 @@ namespace stl2glb {
     }
 
     void EnvironmentHandler::init() {
-        const char* stl_bucket = std::getenv("STL2GLB_STL_BUCKET_NAME");
+        /*const char* stl_bucket = std::getenv("STL2GLB_STL_BUCKET_NAME");
         const char* glb_bucket = std::getenv("STL2GLB_GLB_BUCKET_NAME");
         const char* endpoint = std::getenv("STL2GLB_MINIO_ENDPOINT");
         const char* accessKey = std::getenv("STL2GLB_MINIO_ACCESS_KEY");
@@ -24,7 +24,13 @@ namespace stl2glb {
         glbBucketName = glb_bucket;
         minioEndpoint = endpoint;
         minioAccessKey = accessKey;
-        minioSecretKey = secretKey;
+        minioSecretKey = secretKey;*/
+
+        stlBucketName = "printer_model";
+        glbBucketName = "printer_glb_model";
+        minioEndpoint = "http://minio.aredegalli.it:7800";
+        minioAccessKey = "admin";
+        minioSecretKey = "k9ef8g74IlGXiTlO114vKU79fOAy6aPU";
     }
 
     const std::string& EnvironmentHandler::getStlBucketName() const {

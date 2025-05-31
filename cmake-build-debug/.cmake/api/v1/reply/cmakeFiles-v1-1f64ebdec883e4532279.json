@@ -1,0 +1,275 @@
+{
+	"inputs" : 
+	[
+		{
+			"path" : "CMakeLists.txt"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "cmake-build-debug/CMakeFiles/3.31.6/CMakeSystem.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "D:/Progetti/vcpkg/scripts/buildsystems/vcpkg.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/CMakeDependentOption.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/CMakeSystemSpecificInitialize.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Platform/Windows-Initialize.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "cmake-build-debug/CMakeFiles/3.31.6/CMakeCXXCompiler.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/CMakeSystemSpecificInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/CMakeGenericSystem.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/CMakeInitializeConfigs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Platform/Windows.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Platform/WindowsPaths.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/CMakeCXXInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/CMakeLanguageInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Compiler/GNU-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Compiler/GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Compiler/CMakeCommonCompilerMacros.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Platform/Windows-GNU-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Platform/Windows-GNU.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "cmake-build-debug/CMakeFiles/3.31.6/CMakeRCCompiler.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/CMakeRCInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Platform/Windows-windres.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Platform/Windows-GNU-CXX-ABI.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/CMakeCommonLanguageInclude.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Internal/CMakeCXXLinkerInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Internal/CMakeCommonLinkerInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Linker/GNU-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Linker/GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Platform/Linker/Windows-GNU-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Platform/Linker/Windows-GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Platform/Linker/GNU.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "D:/Progetti/vcpkg/installed/x64-windows/share/openssl/vcpkg-cmake-wrapper.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/FindOpenSSL.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "D:/Progetti/vcpkg/installed/x64-windows/share/nlohmann_json/nlohmann_jsonConfigVersion.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "D:/Progetti/vcpkg/installed/x64-windows/share/nlohmann_json/nlohmann_jsonConfig.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "D:/Progetti/vcpkg/installed/x64-windows/share/nlohmann_json/nlohmann_jsonTargets.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "D:/Progetti/vcpkg/installed/x64-windows/share/httplib/httplibConfigVersion.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "D:/Progetti/vcpkg/installed/x64-windows/share/httplib/httplibConfig.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/CMakeFindDependencyMacro.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/FindThreads.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/CheckLibraryExists.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/CheckIncludeFileCXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/CheckCXXSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/Internal/CheckSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "D:/Progetti/vcpkg/installed/x64-windows/share/unofficial-brotli/unofficial-brotli-config.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "D:/Progetti/vcpkg/installed/x64-windows/share/unofficial-brotli/unofficial-brotli-config-debug.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "D:/Progetti/vcpkg/installed/x64-windows/share/unofficial-brotli/unofficial-brotli-config-release.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "D:/Progetti/vcpkg/installed/x64-windows/share/httplib/httplibTargets.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/FindPackageMessage.cmake"
+		}
+	],
+	"kind" : "cmakeFiles",
+	"paths" : 
+	{
+		"build" : "D:/Progetti/stl2glb/cmake-build-debug",
+		"source" : "D:/Progetti/stl2glb"
+	},
+	"version" : 
+	{
+		"major" : 1,
+		"minor" : 1
+	}
+}
