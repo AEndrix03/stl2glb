@@ -46,7 +46,7 @@ docker-compose -f docker-compose-external-vcpkg.yml --profile setup up vcpkg-ins
 log_success "vcpkg setup completed!"
 log_info "Now you can build the app super fast with:"
 echo ""
-echo "  docker-compose -f docker-compose-external-vcpkg.yml --profile app up --build"
+echo "  docker-compose -f docker-compose-tiny.yml --profile app up --build"
 echo ""
 log_info "Subsequent builds will be ~5x faster because vcpkg is cached!"
 
