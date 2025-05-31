@@ -28,10 +28,13 @@ namespace stl2glb {
             Logger::info("Access Key length: " + std::to_string(accessKey.length()));
             Logger::info("Secret Key length: " + std::to_string(secretKey.length()));
 
-            credentials = std::make_shared<minio::creds::StaticProvider>(
-                    accessKey,
-                    secretKey
-            );
+            // Debug: mostra i primi e gli ultimi caratteri delle chiavi
+            if (!accessKey.empty()) {
+                std::string firstChars = accessKey.substr(0, std::min(size_t(3), accessKey.length()));
+                std::string lastChars = accessKey.length() > 3 ?
+                                        accessKey.substr(accessKey.length() - 3) : "";
+                Logger::info("Access Key preview: " + firstChars + "..." + lastChars);
+            }
 
             // Controlla se l'endpoint include già il protocollo
             if (endpoint.find("http://") != 0 && endpoint.find("https://") != 0) {
@@ -53,77 +56,110 @@ namespace stl2glb {
             // Log per debug di connessione
             Logger::info("Testing connection to endpoint before initializing client...");
 
-            // Non possiamo utilizzare httplib direttamente qui perché non è disponibile
-            // Procediamo comunque con la creazione del client MinIO
+            try {
+                // Crea le credenziali
+                credentials = std::make_shared<minio::creds::StaticProvider>(
+                        accessKey,
+                        secretKey
+                );
 
-            minio::s3::BaseUrl baseUrl{endpoint};
+                // Crea il client
+                minio::s3::BaseUrl baseUrl{endpoint};
+                client = std::make_shared<minio::s3::Client>(baseUrl, credentials.get());
 
-            // Creiamo il client senza configurazione aggiuntiva
-            client = std::make_shared<minio::s3::Client>(baseUrl, credentials.get());
+                // Test di connessione base
+                minio::s3::ListBucketsArgs args;
+                auto result = client->ListBuckets(args);
+
+                if (result) {
+                    Logger::info("Successfully connected to MinIO! Found " +
+                                 std::to_string(result.buckets.size()) + " buckets");
+
+                    // Stampa i nomi dei bucket trovati
+                    std::string bucketList = "";
+                    for (const auto& bucket : result.buckets) {
+                        if (!bucketList.empty()) bucketList += ", ";
+                        bucketList += bucket.name;
+                    }
+                    if (!bucketList.empty()) {
+                        Logger::info("Available buckets: " + bucketList);
+                    }
+                } else {
+                    Logger::error("Failed to list buckets. Error: " + result.code + " - " + result.message);
+
+                    // Se abbiamo ricevuto un errore di accesso negato, le credenziali sono probabilmente sbagliate
+                    if (result.code == "AccessDenied" || result.code == "InvalidAccessKeyId") {
+                        Logger::error("Authentication failed. Please check your access key and secret key.");
+                    }
+                }
+            } catch (const std::exception& e) {
+                Logger::error("Exception during MinIO client initialization: " + std::string(e.what()));
+            }
 
             // Verifica che i bucket esistano e creali se necessario
             // Non lanciamo eccezioni per permettere al programma di continuare
             try {
-                ensureBucketExists(env.getStlBucketName());
-                ensureBucketExists(env.getGlbBucketName());
+                if (!bucketExists(env.getStlBucketName())) {
+                    createBucket(env.getStlBucketName());
+                }
+
+                if (!bucketExists(env.getGlbBucketName())) {
+                    createBucket(env.getGlbBucketName());
+                }
             } catch (const std::exception& e) {
                 Logger::error("Failed to ensure buckets exist: " + std::string(e.what()));
                 Logger::info("Continuing anyway...");
             }
         }
 
-        void ensureBucketExists(const std::string& bucketName) {
+        bool bucketExists(const std::string& bucketName) {
             try {
-                // Log per debug
                 Logger::info("Checking if bucket exists: " + bucketName);
 
                 minio::s3::BucketExistsArgs args;
                 args.bucket = bucketName;
 
-                // Gestione più robusta della risposta
                 auto result = client->BucketExists(args);
-
-                // Esamina la risposta in dettaglio per debug
-                std::string errorDetails = "Code: " + result.code + ", Message: " + result.message;
                 if (!result) {
-                    Logger::error("Failed to check if bucket exists: " + errorDetails);
-
-                    // Invece di fallire, assumiamo che il bucket non esista e proviamo a crearlo
-                    Logger::info("Assuming bucket doesn't exist, trying to create: " + bucketName);
-                } else {
-                    // Se la risposta è valida, controlliamo se il bucket esiste
-                    if (!result.exist) {
-                        Logger::info("Bucket doesn't exist, creating: " + bucketName);
-                    } else {
-                        Logger::info("Bucket already exists: " + bucketName);
-                        return; // Il bucket esiste, non è necessario crearlo
-                    }
+                    // Se il risultato non è valido, stampa il codice e il messaggio di errore
+                    Logger::error("Failed to check if bucket exists. Code: " + result.code +
+                                  ", Message: " + result.message);
+                    return false;
                 }
 
-                // Tentiamo di creare il bucket
-                try {
-                    minio::s3::MakeBucketArgs mkArgs;
-                    mkArgs.bucket = bucketName;
-
-                    auto mkResult = client->MakeBucket(mkArgs);
-                    if (!mkResult) {
-                        std::string mkErrorDetails = "Code: " + mkResult.code + ", Message: " + mkResult.message;
-                        Logger::error("Failed to create bucket: " + mkErrorDetails);
-
-                        // Proviamo comunque a procedere, il bucket potrebbe già esistere
-                        Logger::info("Proceeding anyway, the bucket might already exist");
-                    } else {
-                        Logger::info("Created bucket: " + bucketName);
-                    }
-                } catch (const std::exception& e) {
-                    Logger::error("Exception in bucket creation: " + std::string(e.what()));
-                    // Continua comunque, potrebbe funzionare se il bucket esiste già
-                    Logger::info("Proceeding anyway after bucket creation exception");
+                // Verifica il campo exist della risposta
+                if (result.exist) {
+                    Logger::info("Bucket exists: " + bucketName);
+                    return true;
+                } else {
+                    Logger::info("Bucket does not exist: " + bucketName);
+                    return false;
                 }
             } catch (const std::exception& e) {
-                Logger::error("Exception in ensureBucketExists: " + std::string(e.what()));
-                // Non propaghiamo l'eccezione, proviamo comunque a procedere
-                Logger::info("Proceeding despite bucket check failure");
+                Logger::error("Exception in bucketExists: " + std::string(e.what()));
+                return false;
+            }
+        }
+
+        bool createBucket(const std::string& bucketName) {
+            try {
+                Logger::info("Creating bucket: " + bucketName);
+
+                minio::s3::MakeBucketArgs args;
+                args.bucket = bucketName;
+
+                auto result = client->MakeBucket(args);
+                if (!result) {
+                    Logger::error("Failed to create bucket. Code: " + result.code +
+                                  ", Message: " + result.message);
+                    return false;
+                }
+
+                Logger::info("Successfully created bucket: " + bucketName);
+                return true;
+            } catch (const std::exception& e) {
+                Logger::error("Exception in createBucket: " + std::string(e.what()));
+                return false;
             }
         }
 
@@ -143,18 +179,34 @@ namespace stl2glb {
             try {
                 ensureDirectoryExists(localPath);
 
+                Logger::info("Downloading object: " + objectName + " from bucket: " + bucket);
+
+                // Verifica prima se l'oggetto esiste
+                if (!objectExists(bucket, objectName)) {
+                    throw std::runtime_error("Object does not exist in bucket: " + objectName);
+                }
+
                 minio::s3::DownloadObjectArgs args;
                 args.bucket = bucket;
                 args.object = objectName;
                 args.filename = localPath;
                 args.overwrite = true;
 
-                Logger::info("Downloading object: " + objectName + " from bucket: " + bucket);
                 auto result = client->DownloadObject(args);
 
-                std::string errorDetails = "Code: " + result.code + ", Message: " + result.message;
                 if (!result) {
+                    std::string errorDetails = "Code: " + result.code + ", Message: " + result.message;
                     Logger::error("Download failed: " + errorDetails);
+
+                    // Log aggiuntivo per debug
+                    if (result.code == "AccessDenied") {
+                        Logger::error("Access denied. Please check your credentials and bucket permissions.");
+                    } else if (result.code == "NoSuchKey") {
+                        Logger::error("The specified object does not exist: " + objectName);
+                    } else if (result.code == "NoSuchBucket") {
+                        Logger::error("The specified bucket does not exist: " + bucket);
+                    }
+
                     throw std::runtime_error("MinIO download error: " + errorDetails);
                 }
 
@@ -162,6 +214,29 @@ namespace stl2glb {
             } catch (const std::exception& e) {
                 Logger::error("Exception in download: " + std::string(e.what()));
                 throw;
+            }
+        }
+
+        bool objectExists(const std::string& bucket, const std::string& objectName) {
+            try {
+                Logger::info("Checking if object exists: " + objectName + " in bucket: " + bucket);
+
+                minio::s3::StatObjectArgs args;
+                args.bucket = bucket;
+                args.object = objectName;
+
+                auto result = client->StatObject(args);
+                if (!result) {
+                    Logger::error("Object does not exist. Code: " + result.code +
+                                  ", Message: " + result.message);
+                    return false;
+                }
+
+                Logger::info("Object exists: " + objectName);
+                return true;
+            } catch (const std::exception& e) {
+                Logger::error("Exception in objectExists: " + std::string(e.what()));
+                return false;
             }
         }
 
@@ -175,22 +250,50 @@ namespace stl2glb {
                     throw std::runtime_error(error);
                 }
 
+                // Verifica che il bucket esista, se non esiste crealo
+                if (!bucketExists(bucket)) {
+                    Logger::info("Bucket doesn't exist for upload, creating: " + bucket);
+                    if (!createBucket(bucket)) {
+                        throw std::runtime_error("Failed to create bucket for upload: " + bucket);
+                    }
+                }
+
+                // Log della dimensione del file
+                auto fileSize = std::filesystem::file_size(localPath);
+                Logger::info("Uploading file of size " + std::to_string(fileSize) +
+                             " bytes to " + bucket + "/" + objectName);
+
                 minio::s3::UploadObjectArgs args;
                 args.bucket = bucket;
                 args.object = objectName;
                 args.filename = localPath;
                 args.content_type = "model/gltf-binary";
 
-                Logger::info("Uploading object: " + objectName + " to bucket: " + bucket);
+                Logger::info("Starting upload to bucket: " + bucket + ", object: " + objectName);
                 auto result = client->UploadObject(args);
 
-                std::string errorDetails = "Code: " + result.code + ", Message: " + result.message;
                 if (!result) {
+                    std::string errorDetails = "Code: " + result.code + ", Message: " + result.message;
                     Logger::error("Upload failed: " + errorDetails);
+
+                    // Log aggiuntivo per debug
+                    if (result.code == "AccessDenied") {
+                        Logger::error("Access denied. Please check your credentials and bucket permissions.");
+                    } else if (result.code == "NoSuchBucket") {
+                        Logger::error("The specified bucket does not exist: " + bucket);
+                    }
+
                     throw std::runtime_error("MinIO upload error: " + errorDetails);
                 }
 
                 Logger::info("Upload successful: " + objectName);
+
+                // Verifica che l'oggetto sia stato effettivamente caricato
+                if (objectExists(bucket, objectName)) {
+                    Logger::info("Verified that object exists after upload: " + objectName);
+                } else {
+                    Logger::warn("Object not found after upload. This is unexpected: " + objectName);
+                }
             } catch (const std::exception& e) {
                 Logger::error("Exception in upload: " + std::string(e.what()));
                 throw;

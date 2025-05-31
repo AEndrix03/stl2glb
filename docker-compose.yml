@@ -8,6 +8,10 @@ volumes:
       device: /home/vcpkg
       o: bind
 
+networks:
+  stl2glb-network:
+    driver: bridge
+
 services:
   builder:
     image: ubuntu:22.04
@@ -23,6 +27,8 @@ services:
       cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=/project/external/vcpkg/scripts/buildsystems/vcpkg.cmake &&
       cmake --build build --config Release
       "
+    networks:
+      - stl2glb-network
 
   app:
     image: ubuntu:22.04
@@ -31,12 +37,10 @@ services:
       - 8.8.8.8
       - 8.8.4.4
       - 1.1.1.1  # Aggiunti più server DNS per redundancy
-    # Abilitare il networking host per accedere meglio alle risorse esterne
-    # Scommentare se stai utilizzando Docker in modalità standalone
-    # network_mode: "host"
     container_name: stl2glb_app
     depends_on:
       - builder
+      - init-minio
     volumes:
       - ./:/project
     working_dir: /project
@@ -66,3 +70,5 @@ services:
       timeout: 10s
       retries: 3
       start_period: 5s
+    networks:
+      - stl2glb-network
