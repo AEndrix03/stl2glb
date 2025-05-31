@@ -6,7 +6,8 @@
 			[
 				{
 					"build" : ".",
-					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-b3c7fe2506e977cb0bec.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.16"
@@ -41,14 +42,14 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "stl2glb::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-stl2glb-Debug-aa4746ba1288ef4a527e.json",
+					"jsonFile" : "target-stl2glb-Debug-ce6edd633211ddeec440.json",
 					"name" : "stl2glb",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "stl2glb_exec::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-stl2glb_exec-Debug-ce9aa8d7bc0d70d97021.json",
+					"jsonFile" : "target-stl2glb_exec-Debug-a6702d6c3aec813bbded.json",
 					"name" : "stl2glb_exec",
 					"projectIndex" : 0
 				}

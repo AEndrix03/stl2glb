@@ -31,7 +31,7 @@
 			{
 				"command" : 1,
 				"file" : 1,
-				"line" : 36,
+				"line" : 64,
 				"parent" : 0
 			},
 			{
@@ -43,25 +43,31 @@
 			{
 				"command" : 2,
 				"file" : 1,
-				"line" : 45,
+				"line" : 81,
 				"parent" : 0
 			},
 			{
 				"command" : 3,
 				"file" : 1,
-				"line" : 68,
+				"line" : 67,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 1,
+				"line" : 125,
 				"parent" : 0
 			},
 			{
 				"command" : 4,
 				"file" : 1,
-				"line" : 16,
+				"line" : 29,
 				"parent" : 0
 			},
 			{
 				"command" : 5,
 				"file" : 1,
-				"line" : 39,
+				"line" : 75,
 				"parent" : 0
 			}
 		]
@@ -87,21 +93,37 @@
 				},
 				{
 					"backtrace" : 4,
-					"define" : "_DEBUG"
+					"define" : "TINYGLTF_NO_EXTERNAL_IMAGE"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "TINYGLTF_NO_STB_IMAGE"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "TINYGLTF_NO_STB_IMAGE_WRITE"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "TINYGLTF_USE_CPP14"
 				},
 				{
 					"backtrace" : 5,
+					"define" : "_DEBUG"
+				},
+				{
+					"backtrace" : 6,
 					"define" : "_WIN32_WINNT=0x0601"
 				}
 			],
 			"includes" : 
 			[
 				{
-					"backtrace" : 6,
+					"backtrace" : 7,
 					"path" : "D:/Progetti/stl2glb/include"
 				},
 				{
-					"backtrace" : 6,
+					"backtrace" : 7,
 					"path" : "D:/Progetti/stl2glb/external/tinygltf"
 				},
 				{

@@ -15,6 +15,7 @@
 		[
 			"_add_executable",
 			"add_executable",
+			"install",
 			"target_link_libraries",
 			"set_target_properties",
 			"include",
@@ -37,7 +38,7 @@
 			{
 				"command" : 1,
 				"file" : 1,
-				"line" : 63,
+				"line" : 105,
 				"parent" : 0
 			},
 			{
@@ -49,57 +50,63 @@
 			{
 				"command" : 2,
 				"file" : 1,
-				"line" : 64,
+				"line" : 119,
 				"parent" : 0
-			},
-			{
-				"command" : 2,
-				"file" : 1,
-				"line" : 45,
-				"parent" : 0
-			},
-			{
-				"command" : 6,
-				"file" : 1,
-				"line" : 22,
-				"parent" : 0
-			},
-			{
-				"command" : 5,
-				"file" : 0,
-				"line" : 893,
-				"parent" : 5
-			},
-			{
-				"file" : 3,
-				"parent" : 6
-			},
-			{
-				"command" : 4,
-				"file" : 3,
-				"line" : 99,
-				"parent" : 7
-			},
-			{
-				"file" : 2,
-				"parent" : 8
 			},
 			{
 				"command" : 3,
-				"file" : 2,
-				"line" : 60,
-				"parent" : 9
+				"file" : 1,
+				"line" : 106,
+				"parent" : 0
 			},
 			{
-				"command" : 2,
+				"command" : 3,
 				"file" : 1,
-				"line" : 54,
+				"line" : 81,
 				"parent" : 0
 			},
 			{
 				"command" : 7,
 				"file" : 1,
-				"line" : 16,
+				"line" : 39,
+				"parent" : 0
+			},
+			{
+				"command" : 6,
+				"file" : 0,
+				"line" : 893,
+				"parent" : 6
+			},
+			{
+				"file" : 3,
+				"parent" : 7
+			},
+			{
+				"command" : 5,
+				"file" : 3,
+				"line" : 99,
+				"parent" : 8
+			},
+			{
+				"file" : 2,
+				"parent" : 9
+			},
+			{
+				"command" : 4,
+				"file" : 2,
+				"line" : 60,
+				"parent" : 10
+			},
+			{
+				"command" : 3,
+				"file" : 1,
+				"line" : 96,
+				"parent" : 0
+			},
+			{
+				"command" : 8,
+				"file" : 1,
+				"line" : 29,
 				"parent" : 0
 			}
 		]
@@ -116,34 +123,34 @@
 			"defines" : 
 			[
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"define" : "BROTLI_SHARED_COMPILATION"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"define" : "CPPHTTPLIB_BROTLI_SUPPORT"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"define" : "_DEBUG"
 				},
 				{
-					"backtrace" : 12,
+					"backtrace" : 13,
 					"define" : "_WIN32_WINNT=0x0601"
 				}
 			],
 			"includes" : 
 			[
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"path" : "D:/Progetti/stl2glb/include"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"path" : "D:/Progetti/stl2glb/external/tinygltf"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 4,
 					"isSystem" : true,
 					"path" : "D:/Progetti/vcpkg/installed/x64-windows/include"
 				}
@@ -153,7 +160,7 @@
 			{
 				"backtraces" : 
 				[
-					3
+					4
 				],
 				"standard" : "17"
 			},
@@ -166,11 +173,25 @@
 	"dependencies" : 
 	[
 		{
-			"backtrace" : 3,
+			"backtrace" : 4,
 			"id" : "stl2glb::@6890427a1f51a3e7e1df"
 		}
 	],
 	"id" : "stl2glb_exec::@6890427a1f51a3e7e1df",
+	"install" : 
+	{
+		"destinations" : 
+		[
+			{
+				"backtrace" : 3,
+				"path" : "bin"
+			}
+		],
+		"prefix" : 
+		{
+			"path" : "C:/Program Files (x86)/stl2glb"
+		}
+	},
 	"link" : 
 	{
 		"commandFragments" : 
@@ -184,52 +205,52 @@
 				"role" : "flags"
 			},
 			{
-				"backtrace" : 3,
+				"backtrace" : 4,
 				"fragment" : "libstl2glb.a",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 4,
+				"backtrace" : 5,
 				"fragment" : "D:\\Progetti\\vcpkg\\installed\\x64-windows\\debug\\lib\\libssl.lib",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 4,
+				"backtrace" : 5,
 				"fragment" : "D:\\Progetti\\vcpkg\\installed\\x64-windows\\debug\\lib\\libcrypto.lib",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 10,
+				"backtrace" : 11,
 				"fragment" : "D:\\Progetti\\vcpkg\\installed\\x64-windows\\debug\\lib\\brotlienc.lib",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 10,
+				"backtrace" : 11,
 				"fragment" : "D:\\Progetti\\vcpkg\\installed\\x64-windows\\debug\\lib\\brotlidec.lib",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 10,
+				"backtrace" : 11,
 				"fragment" : "D:\\Progetti\\vcpkg\\installed\\x64-windows\\debug\\lib\\brotlicommon.lib",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 11,
+				"backtrace" : 12,
 				"fragment" : "-lws2_32",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 11,
+				"backtrace" : 12,
 				"fragment" : "-lcrypt32",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 11,
+				"backtrace" : 12,
 				"fragment" : "-lbcrypt",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 11,
+				"backtrace" : 12,
 				"fragment" : "-lwinhttp",
 				"role" : "libraries"
 			},
@@ -273,7 +294,7 @@
 			"sourceGroupIndex" : 0
 		},
 		{
-			"backtrace" : 3,
+			"backtrace" : 4,
 			"path" : "D:/Progetti/vcpkg/installed/x64-windows/share/nlohmann_json/nlohmann_json.natvis",
 			"sourceGroupIndex" : 1
 		}

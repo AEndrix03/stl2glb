@@ -2,3 +2,7 @@ D:/Progetti/stl2glb/cmake-build-debug/CMakeFiles/stl2glb.dir
 D:/Progetti/stl2glb/cmake-build-debug/CMakeFiles/stl2glb_exec.dir
 D:/Progetti/stl2glb/cmake-build-debug/CMakeFiles/edit_cache.dir
 D:/Progetti/stl2glb/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+D:/Progetti/stl2glb/cmake-build-debug/CMakeFiles/list_install_components.dir
+D:/Progetti/stl2glb/cmake-build-debug/CMakeFiles/install.dir
+D:/Progetti/stl2glb/cmake-build-debug/CMakeFiles/install/local.dir
+D:/Progetti/stl2glb/cmake-build-debug/CMakeFiles/install/strip.dir

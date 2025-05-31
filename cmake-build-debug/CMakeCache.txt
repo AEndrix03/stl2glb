@@ -134,10 +134,10 @@ CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 CMAKE_PROJECT_NAME:STATIC=stl2glb
 
 //Value Computed by CMake
-CMAKE_PROJECT_VERSION:STATIC=1.0.0
+CMAKE_PROJECT_VERSION:STATIC=2.0.0
 
 //Value Computed by CMake
-CMAKE_PROJECT_VERSION_MAJOR:STATIC=1
+CMAKE_PROJECT_VERSION_MAJOR:STATIC=2
 
 //Value Computed by CMake
 CMAKE_PROJECT_VERSION_MINOR:STATIC=0
@@ -318,6 +318,9 @@ Z_VCPKG_PWSH_PATH:FILEPATH=Z_VCPKG_PWSH_PATH-NOTFOUND
 //The directory which contains the installed libraries for each
 // triplet
 _VCPKG_INSTALLED_DIR:PATH=D:/Progetti/vcpkg/installed
+
+//The directory containing a CMake configuration file for draco.
+draco_DIR:PATH=draco_DIR-NOTFOUND
 
 //The directory containing a CMake configuration file for httplib.
 httplib_DIR:PATH=D:/Progetti/vcpkg/installed/x64-windows/share/httplib
