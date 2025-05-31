@@ -1,4 +1,4 @@
-"E:\Jetbrains\CLion 2025.1\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=E:/Jetbrains/CLion 2025.1/bin/ninja/win/x64/ninja.exe" -DVCPKG_INSTALLED_DIR=external/vcpkg/installed/x64-windows -G Ninja -S D:\Progetti\stl2glb -B D:\Progetti\stl2glb\cmake-build-debug
+"E:\Jetbrains\CLion 2025.1\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=E:/Jetbrains/CLion 2025.1/bin/ninja/win/x64/ninja.exe" -DCMAKE_TOOLCHAIN_FILE=D:/Progetti/vcpkg/scripts/buildsystems/vcpkg.cmake -G Ninja -S D:\Progetti\stl2glb -B D:\Progetti\stl2glb\cmake-build-debug
 CMake Error at E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake:233 (message):
   Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the
   system variable OPENSSL_ROOT_DIR (missing: OPENSSL_CRYPTO_LIBRARY
@@ -6,6 +6,7 @@ CMake Error at E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modu
 Call Stack (most recent call first):
   E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake:603 (_FPHSA_FAILURE_MESSAGE)
   E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/FindOpenSSL.cmake:691 (find_package_handle_standard_args)
+  D:/Progetti/vcpkg/scripts/buildsystems/vcpkg.cmake:893 (_find_package)
   CMakeLists.txt:8 (find_package)
 
 
