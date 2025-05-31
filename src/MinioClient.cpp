@@ -31,8 +31,22 @@ namespace stl2glb {
                     secretKey
             );
 
+            // Controlla se l'endpoint include già il protocollo
+            if (endpoint.find("http://") != 0 && endpoint.find("https://") != 0) {
+                // Se non c'è protocollo, aggiungi http:// come default
+                endpoint = "http://" + endpoint;
+                Logger::info("Adjusted endpoint with HTTP protocol: " + endpoint);
+            }
+
             minio::s3::BaseUrl baseUrl{endpoint};
-            client = std::make_shared<minio::s3::Client>(baseUrl, credentials.get());
+
+            // Configurazione client con timeout più lunghi
+            minio::s3::ClientConfig config;
+            config.connect_timeout_ms = 30000;  // 30 secondi
+            config.read_timeout_ms = 30000;     // 30 secondi
+            config.ssl_cert_file = "";          // Nessun certificato SSL
+
+            client = std::make_shared<minio::s3::Client>(baseUrl, credentials.get(), config);
 
             // Verifica che i bucket esistano e creali se necessario
             ensureBucketExists(env.getStlBucketName());
@@ -41,33 +55,56 @@ namespace stl2glb {
 
         void ensureBucketExists(const std::string& bucketName) {
             try {
+                // Log per debug
+                Logger::info("Checking if bucket exists: " + bucketName);
+
                 minio::s3::BucketExistsArgs args;
                 args.bucket = bucketName;
 
+                // Gestione più robusta della risposta
                 auto result = client->BucketExists(args);
+
+                // Esamina la risposta in dettaglio per debug
+                std::string errorDetails = "Code: " + result.code + ", Message: " + result.message;
                 if (!result) {
-                    Logger::error("Failed to check if bucket exists: " + result.message);
-                    throw std::runtime_error("MinIO error: " + result.message);
+                    Logger::error("Failed to check if bucket exists: " + errorDetails);
+
+                    // Invece di fallire, assumiamo che il bucket non esista e proviamo a crearlo
+                    Logger::info("Assuming bucket doesn't exist, trying to create: " + bucketName);
+                } else {
+                    // Se la risposta è valida, controlliamo se il bucket esiste
+                    if (!result.exist) {
+                        Logger::info("Bucket doesn't exist, creating: " + bucketName);
+                    } else {
+                        Logger::info("Bucket already exists: " + bucketName);
+                        return; // Il bucket esiste, non è necessario crearlo
+                    }
                 }
 
-                // La risposta è la struttura stessa, non un campo value
-                if (!result) {
-                    Logger::info("Creating bucket: " + bucketName);
+                // Tentiamo di creare il bucket
+                try {
                     minio::s3::MakeBucketArgs mkArgs;
                     mkArgs.bucket = bucketName;
 
                     auto mkResult = client->MakeBucket(mkArgs);
                     if (!mkResult) {
-                        Logger::error("Failed to create bucket: " + mkResult.message);
-                        throw std::runtime_error("MinIO error: " + mkResult.message);
+                        std::string mkErrorDetails = "Code: " + mkResult.code + ", Message: " + mkResult.message;
+                        Logger::error("Failed to create bucket: " + mkErrorDetails);
+
+                        // Proviamo comunque a procedere, il bucket potrebbe già esistere
+                        Logger::info("Proceeding anyway, the bucket might already exist");
+                    } else {
+                        Logger::info("Created bucket: " + bucketName);
                     }
-                    Logger::info("Created bucket: " + bucketName);
-                } else {
-                    Logger::info("Bucket already exists: " + bucketName);
+                } catch (const std::exception& e) {
+                    Logger::error("Exception in bucket creation: " + std::string(e.what()));
+                    // Continua comunque, potrebbe funzionare se il bucket esiste già
+                    Logger::info("Proceeding anyway after bucket creation exception");
                 }
             } catch (const std::exception& e) {
                 Logger::error("Exception in ensureBucketExists: " + std::string(e.what()));
-                throw;
+                // Non propaghiamo l'eccezione, proviamo comunque a procedere
+                Logger::info("Proceeding despite bucket check failure");
             }
         }
 
@@ -95,9 +132,11 @@ namespace stl2glb {
 
                 Logger::info("Downloading object: " + objectName + " from bucket: " + bucket);
                 auto result = client->DownloadObject(args);
+
+                std::string errorDetails = "Code: " + result.code + ", Message: " + result.message;
                 if (!result) {
-                    Logger::error("Download failed: " + result.message);
-                    throw std::runtime_error("MinIO download error: " + result.message);
+                    Logger::error("Download failed: " + errorDetails);
+                    throw std::runtime_error("MinIO download error: " + errorDetails);
                 }
 
                 Logger::info("Download successful: " + objectName);
@@ -125,9 +164,11 @@ namespace stl2glb {
 
                 Logger::info("Uploading object: " + objectName + " to bucket: " + bucket);
                 auto result = client->UploadObject(args);
+
+                std::string errorDetails = "Code: " + result.code + ", Message: " + result.message;
                 if (!result) {
-                    Logger::error("Upload failed: " + result.message);
-                    throw std::runtime_error("MinIO upload error: " + result.message);
+                    Logger::error("Upload failed: " + errorDetails);
+                    throw std::runtime_error("MinIO upload error: " + errorDetails);
                 }
 
                 Logger::info("Upload successful: " + objectName);
