@@ -20,9 +20,15 @@ services:
       echo '🔧 Installing build dependencies...'
       apk add --no-cache build-base cmake ninja linux-headers
       
-      echo '📁 Creating build directory...'
-      cp -r /src /build
+      echo '📁 Creating clean build directory...'
+      rm -rf /build
+      mkdir -p /build
       cd /build
+      
+      echo '📋 Copying source files...'
+      cp -r /src/* /build/
+      # Escludi directory build se esiste
+      rm -rf /build/build /build/cmake-build-* /build/CMakeCache.txt
       
       echo '🔨 Fixing STLParser.cpp if needed...'
       if [ -f 'src/STLParser.cpp' ]; then
@@ -45,6 +51,7 @@ services:
       
       echo '📦 Copying to output...'
       cp build/stl2glb /output/
+      ls -la /output/
       
       echo '✅ Build completed!'
       "

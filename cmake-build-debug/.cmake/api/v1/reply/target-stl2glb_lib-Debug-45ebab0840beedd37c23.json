@@ -3,7 +3,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "libstl2glb.a"
+			"path" : "libstl2glb_lib.a"
 		}
 	],
 	"backtrace" : 2,
@@ -30,7 +30,7 @@
 			{
 				"command" : 1,
 				"file" : 1,
-				"line" : 74,
+				"line" : 83,
 				"parent" : 0
 			},
 			{
@@ -42,31 +42,25 @@
 			{
 				"command" : 2,
 				"file" : 1,
-				"line" : 108,
+				"line" : 105,
 				"parent" : 0
 			},
 			{
 				"command" : 3,
-				"file" : 1,
-				"line" : 77,
-				"parent" : 0
-			},
-			{
-				"command" : 3,
-				"file" : 1,
-				"line" : 139,
-				"parent" : 0
-			},
-			{
-				"command" : 4,
 				"file" : 1,
 				"line" : 86,
 				"parent" : 0
 			},
 			{
-				"command" : 2,
+				"command" : 3,
 				"file" : 1,
-				"line" : 100,
+				"line" : 95,
+				"parent" : 0
+			},
+			{
+				"command" : 4,
+				"file" : 1,
+				"line" : 99,
 				"parent" : 0
 			}
 		]
@@ -77,7 +71,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : " -Wall -Wextra -g -std=gnu++17 -fdiagnostics-color=always"
+					"fragment" : "-g -std=gnu++17 -fdiagnostics-color=always"
 				}
 			],
 			"defines" : 
@@ -89,10 +83,6 @@
 				{
 					"backtrace" : 3,
 					"define" : "CPPHTTPLIB_BROTLI_SUPPORT"
-				},
-				{
-					"backtrace" : 4,
-					"define" : "NDEBUG"
 				},
 				{
 					"backtrace" : 4,
@@ -126,7 +116,7 @@
 					"path" : "D:/Progetti/stl2glb/external/tinygltf"
 				},
 				{
-					"backtrace" : 7,
+					"backtrace" : 3,
 					"isSystem" : true,
 					"path" : "D:/Progetti/vcpkg/installed/x64-windows/include"
 				}
@@ -136,7 +126,7 @@
 			{
 				"backtraces" : 
 				[
-					7
+					3
 				],
 				"standard" : "17"
 			},
@@ -150,14 +140,13 @@
 				5,
 				6,
 				7,
-				8,
-				9
+				8
 			]
 		}
 	],
-	"id" : "stl2glb::@6890427a1f51a3e7e1df",
-	"name" : "stl2glb",
-	"nameOnDisk" : "libstl2glb.a",
+	"id" : "stl2glb_lib::@6890427a1f51a3e7e1df",
+	"name" : "stl2glb_lib",
+	"nameOnDisk" : "libstl2glb_lib.a",
 	"paths" : 
 	{
 		"build" : ".",
@@ -177,20 +166,25 @@
 				5,
 				6,
 				7,
-				8,
-				9
+				8
 			]
 		},
 		{
 			"name" : "",
 			"sourceIndexes" : 
 			[
-				10
+				9
 			]
 		}
 	],
 	"sources" : 
 	[
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "external/tinygltf/tiny_gltf.cc",
+			"sourceGroupIndex" : 0
+		},
 		{
 			"backtrace" : 2,
 			"compileGroupIndex" : 0,
@@ -240,19 +234,7 @@
 			"sourceGroupIndex" : 0
 		},
 		{
-			"backtrace" : 2,
-			"compileGroupIndex" : 0,
-			"path" : "src/SimpleMinioClient.cpp",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 2,
-			"compileGroupIndex" : 0,
-			"path" : "external/tinygltf/tiny_gltf.cc",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 7,
+			"backtrace" : 3,
 			"path" : "D:/Progetti/vcpkg/installed/x64-windows/share/nlohmann_json/nlohmann_json.natvis",
 			"sourceGroupIndex" : 1
 		}

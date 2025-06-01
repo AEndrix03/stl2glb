@@ -309,11 +309,6 @@
 		{
 			"isExternal" : true,
 			"path" : "D:/Progetti/vcpkg/installed/x64-windows/share/draco/draco-targets-release.cmake"
-		},
-		{
-			"isCMake" : true,
-			"isExternal" : true,
-			"path" : "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/CheckIncludeFileCXX.cmake"
 		}
 	],
 	"kind" : "cmakeFiles",

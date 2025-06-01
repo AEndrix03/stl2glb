@@ -5,7 +5,7 @@
 100	1927	7704765670191371	CMakeFiles/stl2glb.dir/src/main.cpp.obj	cc5734286096afc5
 40	11050	7704765669583052	CMakeFiles/stl2glb.dir/src/GLBWriter.cpp.obj	249e5a5cebb088d3
 28	1959	7704765669466580	CMakeFiles/stl2glb.dir/src/EnvironmentHandler.cpp.obj	8a0a7aefbeac07d2
-4	356	7704781433628671	build.ninja	273e1f213b90b79a
+4	356	7705229554700981	build.ninja	273e1f213b90b79a
 63	2923	7704765669814483	CMakeFiles/stl2glb.dir/src/Logger.cpp.obj	5ce70e08d1a7cd75
 76	8003	7704765669940216	CMakeFiles/stl2glb.dir/src/STLParser.cpp.obj	300f2c8dc1dc2407
 52	3145	7704765669698843	CMakeFiles/stl2glb.dir/src/Hasher.cpp.obj	88856df1bd477a10
@@ -13,4 +13,3 @@
 88	31080	7704765670065802	CMakeFiles/stl2glb.dir/src/Server.cpp.obj	d7d81aed75210423
 31080	79193	7704765979975837	libstl2glb.a	76ad02155a0affc7
 119	27610	7704765670372449	CMakeFiles/stl2glb.dir/src/SimpleMinioClient.cpp.obj	9c23224b6511ff62
-44054	105144	7704712417467654	stl2glb_exec.exe	f9c729fb0ba10c52
