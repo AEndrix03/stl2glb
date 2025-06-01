@@ -56,14 +56,6 @@ services:
           cpus: '0.1'
           memory: 64M
 
-    # Health check minimale
-    healthcheck:
-      test: ["CMD", "/stl2glb_exec", "--health"]
-      interval: 60s
-      timeout: 5s
-      retries: 2
-      start_period: 20s
-
     # Logging minimale
     logging:
       driver: "json-file"
