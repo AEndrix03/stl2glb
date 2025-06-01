@@ -22,10 +22,6 @@ WORKDIR /build
 # Copia sorgenti
 COPY . .
 
-# Fix per Linux: aggiungi #include <cmath> se manca
-RUN grep -q "#include <cmath>" src/STLParser.cpp || \
-    sed -i '/#include <atomic>/a #include <cmath>' src/STLParser.cpp
-
 # Build con vcpkg montato come volume esterno
 # NOTA: vcpkg sarà montato in /vcpkg dal docker-compose
 RUN cmake -B build -S . \
@@ -53,7 +49,7 @@ WORKDIR /app
 EXPOSE 8080
 
 # Health check endpoint integrato nell'app
-HEALTHCHECK --interval=60s --timeout=5s --start_period=20s --retries=2 \
+HEALTHCHECK --interval=60s --timeout=5s --start-period=20s --retries=2 \
     CMD ["/app/stl2glb_exec", "--health"]
 
 # Entrypoint
