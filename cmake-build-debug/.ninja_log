@@ -14,3 +14,15 @@
 600	44054	7704711982937994	libstl2glb.a	76ad02155a0affc7
 43	21292	7703781769276494	CMakeFiles/stl2glb.dir/src/SimpleMinioClient.cpp.obj	f6c8e494f54fea2f
 44054	105144	7704712417467654	stl2glb_exec.exe	f9c729fb0ba10c52
+100	1927	7704765670191371	CMakeFiles/stl2glb.dir/src/main.cpp.obj	cc5734286096afc5
+28	1959	7704765669466580	CMakeFiles/stl2glb.dir/src/EnvironmentHandler.cpp.obj	8a0a7aefbeac07d2
+160	2001	7704765670790045	CMakeFiles/stl2glb_exec.dir/src/main.cpp.obj	ae87f051f84a3b47
+63	2923	7704765669814483	CMakeFiles/stl2glb.dir/src/Logger.cpp.obj	5ce70e08d1a7cd75
+52	3145	7704765669698843	CMakeFiles/stl2glb.dir/src/Hasher.cpp.obj	88856df1bd477a10
+76	8003	7704765669940216	CMakeFiles/stl2glb.dir/src/STLParser.cpp.obj	300f2c8dc1dc2407
+40	11050	7704765669583052	CMakeFiles/stl2glb.dir/src/GLBWriter.cpp.obj	249e5a5cebb088d3
+147	22675	7704765670654349	CMakeFiles/stl2glb.dir/external/tinygltf/tiny_gltf.cc.obj	509726943f3b3088
+11	23875	7704765669292393	CMakeFiles/stl2glb.dir/src/Converter.cpp.obj	70646f1e793e6363
+119	27610	7704765670372449	CMakeFiles/stl2glb.dir/src/SimpleMinioClient.cpp.obj	9c23224b6511ff62
+88	31080	7704765670065802	CMakeFiles/stl2glb.dir/src/Server.cpp.obj	d7d81aed75210423
+31080	79193	7704765979975837	libstl2glb.a	76ad02155a0affc7
