@@ -1,7 +1,6 @@
 version: "3.9"
 
 # Docker Compose ottimizzato per VPS con risorse molto limitate
-# Usa vcpkg pre-installato sull'host per build velocissime
 
 services:
   # App ultra-minimale per VPS
@@ -9,10 +8,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-tiny
-      args:
-        VCPKG_DIR: ${VCPKG_HOST_DIR:-/opt/vcpkg}
-    volumes:
-      - ${VCPKG_HOST_DIR:-/opt/vcpkg}:/vcpkg:ro
 
     image: stl2glb:tiny
     container_name: stl2glb_tiny

@@ -1,20 +1,22 @@
-# Dockerfile-tiny - Build ultra-minimale per VPS con risorse limitate
-# Richiede vcpkg pre-installato sull'host montato come volume
+# Dockerfile-tiny-fast - Build veloce usando vcpkg pre-installato sull'host
+# Richiede: VCPKG_HOST_DIR=/opt/vcpkg come build arg
 
-# Stage 1: Builder Alpine minimale
+# Stage 1: Builder con vcpkg copiato dall'host
 FROM alpine:3.19 AS builder
 
-# Installa solo il minimo indispensabile per compilare
+# Argomento per il percorso vcpkg
+ARG VCPKG_HOST_DIR=/opt/vcpkg
+
+# Installa solo build tools (no vcpkg)
 RUN apk add --no-cache \
     build-base \
     cmake \
     ninja \
-    openssl-dev \
-    linux-headers \
-    # Per static linking
-    musl-dev \
-    zlib-static \
-    openssl-libs-static
+    linux-headers
+
+# Copia vcpkg pre-installato dall'host
+# Questo avviene durante il build, non runtime
+COPY --from=host ${VCPKG_HOST_DIR} /vcpkg
 
 # Working directory
 WORKDIR /build
@@ -22,35 +24,36 @@ WORKDIR /build
 # Copia sorgenti
 COPY . .
 
-# Build con vcpkg montato come volume esterno
-# NOTA: vcpkg sarà montato in /vcpkg dal docker-compose
+# Fix per Linux
+RUN grep -q "#include <cmath>" src/STLParser.cpp || \
+    sed -i '/#include <atomic>/a #include <cmath>' src/STLParser.cpp
+
+# Build ottimizzata
 RUN cmake -B build -S . \
     -DCMAKE_BUILD_TYPE=MinSizeRel \
     -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake \
     -DVCPKG_TARGET_TRIPLET=x64-linux \
     -DVCPKG_INSTALLED_DIR=/vcpkg/installed \
-    -DUSE_STATIC_LIBS=OFF \
     -GNinja && \
-    cmake --build build --config MinSizeRel --parallel $(nproc)
+    cmake --build build --config MinSizeRel --parallel $(nproc) && \
+    strip build/stl2glb_exec
 
-# Strip dell'eseguibile per ridurre dimensioni
-RUN strip build/stl2glb_exec
+# Stage 2: Runtime minimale
+FROM alpine:3.19
 
-# Stage 2: Runtime ultra-minimale con distroless
-FROM gcr.io/distroless/cc-debian12:nonroot AS runtime
+# Installa solo librerie runtime essenziali
+RUN apk add --no-cache \
+    libstdc++ \
+    libgcc \
+    openssl \
+    ca-certificates && \
+    adduser -D -u 1000 appuser
 
-# Copia solo l'eseguibile
-COPY --from=builder --chown=nonroot:nonroot /build/build/stl2glb_exec /app/stl2glb_exec
-
-# Working directory
 WORKDIR /app
+USER appuser
 
-# Porta
+# Copia eseguibile
+COPY --from=builder --chown=appuser:appuser /build/build/stl2glb_exec /app/
+
 EXPOSE 8080
-
-# Health check endpoint integrato nell'app
-HEALTHCHECK --interval=60s --timeout=5s --start-period=20s --retries=2 \
-    CMD ["/app/stl2glb_exec", "--health"]
-
-# Entrypoint
 ENTRYPOINT ["/app/stl2glb_exec"]
