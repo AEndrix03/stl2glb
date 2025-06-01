@@ -1,6 +1,5 @@
-# Dockerfile-tiny - RICHIEDE vcpkg pre-installato in /opt/vcpkg
-# NON installa vcpkg automaticamente - fallisce se non presente
-# syntax=docker/dockerfile:1.4
+# Dockerfile-tiny - Copia vcpkg dall'host prima del build
+# PREREQUISITO: vcpkg deve essere presente in ./vcpkg/ nella directory di build
 
 FROM alpine:3.19 AS builder
 
@@ -14,35 +13,29 @@ RUN apk add --no-cache \
 # Working directory
 WORKDIR /build
 
-# CONTROLLO OBBLIGATORIO: vcpkg deve essere presente nell'host
-# Questo comando fallisce immediatamente se /opt/vcpkg non esiste
-RUN --mount=type=bind,source=/opt/vcpkg,target=/vcpkg,ro \
-    if [ ! -d "/vcpkg" ]; then \
-        echo "❌ ERRORE: vcpkg non trovato in /opt/vcpkg"; \
-        echo "🔧 SETUP RICHIESTO: Esegui prima il setup di vcpkg"; \
-        echo "   sudo mkdir -p /opt && cd /opt"; \
-        echo "   sudo git clone https://github.com/Microsoft/vcpkg.git"; \
-        echo "   sudo chown -R \$USER:\$USER /opt/vcpkg"; \
-        echo "   cd /opt/vcpkg && ./bootstrap-vcpkg.sh"; \
-        echo "   ./vcpkg install --triplet=x64-linux nlohmann-json httplib openssl"; \
-        exit 1; \
-    fi && \
-    if [ ! -f "/vcpkg/vcpkg" ]; then \
-        echo "❌ ERRORE: vcpkg non inizializzato correttamente"; \
-        echo "🔧 ESEGUI: cd /opt/vcpkg && ./bootstrap-vcpkg.sh"; \
+# Copia vcpkg dal context (preparato dallo script)
+COPY vcpkg/ /vcpkg/
+
+# Verifica che vcpkg sia presente e funzionante
+RUN if [ ! -f "/vcpkg/vcpkg" ]; then \
+        echo "❌ ERRORE: vcpkg non trovato"; \
+        echo "🔧 Esegui il build tramite: ./build-and-run.sh"; \
         exit 1; \
     fi && \
     if [ ! -d "/vcpkg/installed/x64-linux" ]; then \
-        echo "❌ ERRORE: dipendenze vcpkg non installate"; \
-        echo "🔧 ESEGUI: cd /opt/vcpkg && ./vcpkg install --triplet=x64-linux nlohmann-json httplib openssl"; \
+        echo "❌ ERRORE: dipendenze vcpkg non installate per x64-linux"; \
+        echo "🔧 Verifica l'installazione delle dipendenze"; \
+        ls -la /vcpkg/installed/ || echo "Directory installed non trovata"; \
         exit 1; \
     fi && \
     echo "✅ vcpkg verificato correttamente" && \
-    # Copia vcpkg nel container per il build
-    cp -r /vcpkg /tmp/vcpkg
+    echo "📦 Dipendenze disponibili:" && \
+    ls -la /vcpkg/installed/x64-linux/
 
-# Copia sorgenti
-COPY . .
+# Copia sorgenti del progetto
+COPY src/ ./src/
+COPY CMakeLists.txt ./
+COPY *.cpp *.h ./ 2>/dev/null || true
 
 # Fix per Linux se necessario
 RUN if [ -f "src/STLParser.cpp" ]; then \
@@ -53,9 +46,9 @@ RUN if [ -f "src/STLParser.cpp" ]; then \
 # Build ottimizzata
 RUN cmake -B build -S . \
     -DCMAKE_BUILD_TYPE=MinSizeRel \
-    -DCMAKE_TOOLCHAIN_FILE=/tmp/vcpkg/scripts/buildsystems/vcpkg.cmake \
+    -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake \
     -DVCPKG_TARGET_TRIPLET=x64-linux \
-    -DVCPKG_INSTALLED_DIR=/tmp/vcpkg/installed \
+    -DVCPKG_INSTALLED_DIR=/vcpkg/installed \
     -GNinja && \
     cmake --build build --config MinSizeRel --parallel $(nproc) && \
     strip build/stl2glb_exec

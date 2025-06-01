@@ -6,9 +6,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-tiny
-      # Abilita BuildKit per il mount bind
-      platforms:
-        - linux/amd64
 
     image: stl2glb:tiny
     container_name: stl2glb_tiny
