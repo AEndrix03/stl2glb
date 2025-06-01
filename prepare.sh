@@ -24,27 +24,6 @@ if [ ! -f "${VCPKG_HOST_PATH}/vcpkg" ]; then
     exit 1
 fi
 
-# Verifica dipendenze richieste
-echo "🔍 Verifica dipendenze vcpkg..."
-cd "${VCPKG_HOST_PATH}"
-
-REQUIRED_PACKAGES=("nlohmann-json" "httplib" "openssl")
-MISSING_PACKAGES=()
-
-for package in "${REQUIRED_PACKAGES[@]}"; do
-    if ./vcpkg list | grep -q "^${package}:x64-linux"; then
-        echo "  ✅ ${package}"
-    else
-        echo "  ❌ ${package} - MANCANTE"
-        MISSING_PACKAGES+=("$package")
-    fi
-done
-
-if [ ${#MISSING_PACKAGES[@]} -gt 0 ]; then
-    echo "🔧 Esegui prima: ./setup-vcpkg.sh"
-    exit 1
-fi
-
 cd - > /dev/null
 
 # Prepara vcpkg per il build
