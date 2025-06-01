@@ -11,6 +11,6 @@
 --   Native arch: ON
 --   Draco: 1
 -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
--- Configuring done (0.3s)
+-- Configuring done (0.5s)
 -- Generating done (0.1s)
 -- Build files have been written to: D:/Progetti/stl2glb/cmake-build-debug

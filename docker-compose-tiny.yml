@@ -1,25 +1,92 @@
-# Docker Compose con mount diretto di vcpkg
-# Monta /opt/vcpkg dall'host durante il build
+# Docker Compose multi-stage per stl2glb
+# Stage 1: Builder con vcpkg
+# Stage 2: Runtime minimale
+
+volumes:
+  vcpkg_cache:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/vcpkg
+      o: bind
+
+networks:
+  stl2glb-network:
+    driver: bridge
 
 services:
+  # Stage 1: Builder
+  builder:
+    image: alpine:3.19
+    container_name: stl2glb_builder
+    volumes:
+      - ./:/project
+      - vcpkg_cache:/vcpkg:ro
+    working_dir: /project
+    command: >
+      sh -c "
+      echo '🔧 Installazione build tools...' &&
+      apk add --no-cache build-base cmake ninja linux-headers &&
+      echo '🔍 Verifica vcpkg...' &&
+      ls -la /vcpkg/ &&
+      if [ ! -f '/vcpkg/vcpkg' ]; then
+        echo '❌ vcpkg non trovato in /opt/vcpkg';
+        echo '🔧 Esegui prima: ./setup-vcpkg.sh';
+        exit 1;
+      fi &&
+      if [ ! -d '/vcpkg/installed/x64-linux' ]; then
+        echo '❌ dipendenze vcpkg x64-linux non installate';
+        echo '📦 Directory installed disponibili:';
+        ls -la /vcpkg/installed/ 2>/dev/null || echo 'Directory installed non trovata';
+        exit 1;
+      fi &&
+      echo '✅ vcpkg verificato' &&
+      echo '🔨 Fix per Linux se necessario...' &&
+      if [ -f 'src/STLParser.cpp' ]; then
+        grep -q '#include <cmath>' src/STLParser.cpp ||
+        sed -i '/#include <atomic>/a #include <cmath>' src/STLParser.cpp;
+      fi &&
+      echo '🏗️  Build con vcpkg...' &&
+      cmake -B build -S . \
+        -DCMAKE_BUILD_TYPE=MinSizeRel \
+        -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake \
+        -DVCPKG_TARGET_TRIPLET=x64-linux \
+        -DVCPKG_INSTALLED_DIR=/vcpkg/installed \
+        -GNinja &&
+      cmake --build build --config MinSizeRel --parallel \$(nproc) &&
+      strip build/stl2glb_exec &&
+      echo '✅ Build completato'
+      "
+    networks:
+      - stl2glb-network
+
+  # Stage 2: Runtime minimale
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile-tiny
-
-    image: stl2glb:tiny
+    image: alpine:3.19
     container_name: stl2glb_tiny
-
-    # Configurazione sicurezza
-    restart: unless-stopped
-    read_only: true
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-
+    depends_on:
+      builder:
+        condition: service_completed_successfully
+    volumes:
+      - ./:/project:ro
+    working_dir: /project
+    command: >
+      sh -c "
+      echo '🔧 Installazione runtime libraries...' &&
+      apk add --no-cache libstdc++ libgcc openssl ca-certificates wget &&
+      adduser -D -u 1000 appuser &&
+      echo '🔍 Verifica eseguibile...' &&
+      if [ ! -f 'build/stl2glb_exec' ]; then
+        echo '❌ Eseguibile non trovato. Builder fallito?';
+        exit 1;
+      fi &&
+      echo '✅ Eseguibile trovato' &&
+      echo '🚀 Avvio applicazione...' &&
+      su appuser -c './build/stl2glb_exec'
+      "
     ports:
       - "9002:8080"
+    restart: unless-stopped
 
     env_file:
       - .env
@@ -32,6 +99,7 @@ services:
     dns:
       - 127.0.0.1
       - 1.1.1.1
+      - 8.8.8.8
 
     # Host esterni
     extra_hosts:
@@ -74,3 +142,6 @@ services:
     # Tmpfs per file temporanei
     tmpfs:
       - /tmp:size=50M,noexec,nosuid,nodev
+
+    networks:
+      - stl2glb-network

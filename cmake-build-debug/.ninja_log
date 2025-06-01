@@ -5,7 +5,7 @@
 133	1715	7703777744311679	CMakeFiles/stl2glb.dir/src/main.cpp.obj	18466a8a19cae28b
 15	8143	7703781768994282	CMakeFiles/stl2glb.dir/src/GLBWriter.cpp.obj	64c6bfae9a0f162a
 12	600	7704711977050713	CMakeFiles/stl2glb.dir/src/EnvironmentHandler.cpp.obj	d993eb190800e220
-4	356	7704721452784820	build.ninja	273e1f213b90b79a
+4	356	7704752599672444	build.ninja	273e1f213b90b79a
 100	2443	7703777743982426	CMakeFiles/stl2glb.dir/src/Logger.cpp.obj	ef7201a7c3b25806
 12	4012	7704708889874809	CMakeFiles/stl2glb.dir/src/STLParser.cpp.obj	da4354c2b4a4401e
 25	2299	7703781769088208	CMakeFiles/stl2glb.dir/src/Hasher.cpp.obj	5c5a770a886e554c
