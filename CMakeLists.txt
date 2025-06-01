@@ -106,9 +106,6 @@ file(GLOB_RECURSE SOURCES
         "external/tinygltf/tiny_gltf.cc"
 )
 
-# Escludi MinioClient.cpp se presente
-list(FILTER SOURCES EXCLUDE REGEX ".*MinioClient\\.cpp$")
-
 # Crea la libreria
 add_library(stl2glb_lib STATIC ${SOURCES})
 

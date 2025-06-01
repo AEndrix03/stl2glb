@@ -113,6 +113,14 @@ build CMakeFiles/stl2glb_lib.dir/src/Server.cpp.obj: CXX_COMPILER__stl2glb_lib_u
   OBJECT_DIR = CMakeFiles\stl2glb_lib.dir
   OBJECT_FILE_DIR = CMakeFiles\stl2glb_lib.dir\src
 
+build CMakeFiles/stl2glb_lib.dir/src/SimpleMinioClient.cpp.obj: CXX_COMPILER__stl2glb_lib_unscanned_Debug D$:/Progetti/stl2glb/src/SimpleMinioClient.cpp || cmake_object_order_depends_target_stl2glb_lib
+  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
+  DEP_FILE = CMakeFiles\stl2glb_lib.dir\src\SimpleMinioClient.cpp.obj.d
+  FLAGS = -g -std=gnu++17 -fdiagnostics-color=always
+  INCLUDES = -ID:/Progetti/stl2glb/include -ID:/Progetti/stl2glb/external/tinygltf -isystem D:/Progetti/vcpkg/installed/x64-windows/include
+  OBJECT_DIR = CMakeFiles\stl2glb_lib.dir
+  OBJECT_FILE_DIR = CMakeFiles\stl2glb_lib.dir\src
+
 build CMakeFiles/stl2glb_lib.dir/src/main.cpp.obj: CXX_COMPILER__stl2glb_lib_unscanned_Debug D$:/Progetti/stl2glb/src/main.cpp || cmake_object_order_depends_target_stl2glb_lib
   DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
   DEP_FILE = CMakeFiles\stl2glb_lib.dir\src\main.cpp.obj.d
@@ -129,7 +137,7 @@ build CMakeFiles/stl2glb_lib.dir/src/main.cpp.obj: CXX_COMPILER__stl2glb_lib_uns
 #############################################
 # Link the static library libstl2glb_lib.a
 
-build libstl2glb_lib.a: CXX_STATIC_LIBRARY_LINKER__stl2glb_lib_Debug CMakeFiles/stl2glb_lib.dir/external/tinygltf/tiny_gltf.cc.obj CMakeFiles/stl2glb_lib.dir/src/Converter.cpp.obj CMakeFiles/stl2glb_lib.dir/src/EnvironmentHandler.cpp.obj CMakeFiles/stl2glb_lib.dir/src/GLBWriter.cpp.obj CMakeFiles/stl2glb_lib.dir/src/Hasher.cpp.obj CMakeFiles/stl2glb_lib.dir/src/Logger.cpp.obj CMakeFiles/stl2glb_lib.dir/src/STLParser.cpp.obj CMakeFiles/stl2glb_lib.dir/src/Server.cpp.obj CMakeFiles/stl2glb_lib.dir/src/main.cpp.obj
+build libstl2glb_lib.a: CXX_STATIC_LIBRARY_LINKER__stl2glb_lib_Debug CMakeFiles/stl2glb_lib.dir/external/tinygltf/tiny_gltf.cc.obj CMakeFiles/stl2glb_lib.dir/src/Converter.cpp.obj CMakeFiles/stl2glb_lib.dir/src/EnvironmentHandler.cpp.obj CMakeFiles/stl2glb_lib.dir/src/GLBWriter.cpp.obj CMakeFiles/stl2glb_lib.dir/src/Hasher.cpp.obj CMakeFiles/stl2glb_lib.dir/src/Logger.cpp.obj CMakeFiles/stl2glb_lib.dir/src/STLParser.cpp.obj CMakeFiles/stl2glb_lib.dir/src/Server.cpp.obj CMakeFiles/stl2glb_lib.dir/src/SimpleMinioClient.cpp.obj CMakeFiles/stl2glb_lib.dir/src/main.cpp.obj
   LANGUAGE_COMPILE_FLAGS = -g
   OBJECT_DIR = CMakeFiles\stl2glb_lib.dir
   POST_BUILD = cd .
