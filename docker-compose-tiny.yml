@@ -55,6 +55,12 @@ services:
       echo '🏗️  Build con vcpkg...' &&
       echo '🔍 Debug vcpkg paths:' &&
       echo 'VCPKG_INSTALLED_DIR:' && ls -la /vcpkg/installed/x64-linux/lib/ | head -5 &&
+      echo '🔧 Fix configurazioni vcpkg debug...' &&
+      find /vcpkg/installed/x64-linux/share -name '*.cmake' -exec grep -l 'debug/lib' {} \\; | while read file; do
+        echo \"Fixing: $file\";
+        sed -i 's|/debug/lib|/lib|g' \"$file\";
+        sed -i 's|debug/lib|lib|g' \"$file\";
+      done &&
       echo '🧹 Pulizia cache CMake...' &&
       rm -rf build/ &&
       echo '🔧 Impostazione variabili vcpkg...' &&

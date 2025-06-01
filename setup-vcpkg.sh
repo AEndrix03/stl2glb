@@ -1,82 +1,83 @@
 #!/bin/bash
 
-# Script di setup obbligatorio per vcpkg
-# Deve essere eseguito PRIMA di docker-compose up
-
+# Setup pulito di vcpkg - risolve problemi di dipendenze debug
 set -e
 
 VCPKG_PATH="/home/vcpkg"
-REQUIRED_PACKAGES=("nlohmann-json" "httplib" "openssl")
+TRIPLET="x64-linux"
 
-echo "🔧 Setup vcpkg per stl2glb"
-echo "=========================="
+echo "🧹 Setup pulito vcpkg per stl2glb"
+echo "================================="
 
-# Controllo permessi
-if [ "$EUID" -eq 0 ]; then
-    echo "❌ Non eseguire questo script come root"
-    echo "💡 Usa: ./setup-vcpkg.sh"
-    exit 1
+if [ -d "$VCPKG_PATH" ]; then
+    echo "🗑️  Rimozione vcpkg esistente..."
+    rm -rf "$VCPKG_PATH"
 fi
 
-# Controllo se vcpkg esiste già
-if [ -d "${VCPKG_PATH}" ]; then
-    echo "📁 vcpkg trovato in ${VCPKG_PATH}"
+echo "📥 Clone vcpkg..."
+git clone --depth 1 https://github.com/Microsoft/vcpkg.git "$VCPKG_PATH"
+cd "$VCPKG_PATH"
 
-    # Controllo se è inizializzato
-    if [ ! -f "${VCPKG_PATH}/vcpkg" ]; then
-        echo "⚠️  vcpkg non inizializzato, eseguo bootstrap..."
-        cd ${VCPKG_PATH}
-        ./bootstrap-vcpkg.sh
-    else
-        echo "✅ vcpkg già inizializzato"
-    fi
-else
-    echo "📦 Installazione vcpkg in ${VCPKG_PATH}..."
+echo "🏗️  Bootstrap vcpkg..."
+./bootstrap-vcpkg.sh -disableMetrics
 
-    # Crea directory e clona
-    mkdir -p /home
-    git clone --depth 1 https://github.com/Microsoft/vcpkg.git ${VCPKG_PATH}
-    chown -R $USER:$USER ${VCPKG_PATH}
+echo "📦 Installazione dipendenze solo release..."
+PACKAGES=("openssl" "nlohmann-json" "httplib")
 
-    echo "🏗️  Bootstrap vcpkg..."
-    cd ${VCPKG_PATH}
-    ./bootstrap-vcpkg.sh
-fi
+for PKG in "${PACKAGES[@]}"; do
+    echo "Installing $PKG..."
+    if ! ./vcpkg install "${PKG}:${TRIPLET}" --only-release; then
+        echo "⚠️  --only-release failed, trying normal install..."
+        ./vcpkg install "${PKG}:${TRIPLET}"
 
-# Controllo dipendenze
-echo "🔍 Controllo dipendenze richieste..."
-cd ${VCPKG_PATH}
-
-MISSING_PACKAGES=()
-for package in "${REQUIRED_PACKAGES[@]}"; do
-    if ! ./vcpkg list | grep -q "^${package}:x64-linux"; then
-        MISSING_PACKAGES+=("$package")
+        # Rimuovi debug se esiste
+        if [ -d "installed/${TRIPLET}/debug" ]; then
+            echo "🗑️  Rimozione debug per $PKG..."
+            rm -rf "installed/${TRIPLET}/debug"
+        fi
     fi
 done
 
-if [ ${#MISSING_PACKAGES[@]} -gt 0 ]; then
-    echo "📦 Installazione pacchetti mancanti: ${MISSING_PACKAGES[*]}"
-    ./vcpkg install --triplet=x64-linux --clean-after-build "${MISSING_PACKAGES[@]}"
-else
-    echo "✅ Tutte le dipendenze sono già installate"
-fi
-
-# Verifica finale
-echo "🧪 Verifica finale..."
-for package in "${REQUIRED_PACKAGES[@]}"; do
-    if ./vcpkg list | grep -q "^${package}:x64-linux"; then
-        echo "  ✅ ${package}"
-    else
-        echo "  ❌ ${package} - MANCANTE!"
-        exit 1
+# Draco opzionale
+echo "📦 Installazione draco (opzionale)..."
+if ./vcpkg install "draco:${TRIPLET}" --only-release; then
+    echo "✅ Draco installato"
+elif ./vcpkg install "draco:${TRIPLET}"; then
+    echo "✅ Draco installato (con debug)"
+    if [ -d "installed/${TRIPLET}/debug" ]; then
+        echo "🗑️  Rimozione debug draco..."
+        rm -rf "installed/${TRIPLET}/debug"
     fi
-done
+else
+    echo "⚠️  Draco failed - continuing without"
+fi
 
 echo ""
-echo "🎉 Setup completato con successo!"
-echo "📋 Riepilogo:"
-echo "   📁 vcpkg path: ${VCPKG_PATH}"
-echo "   📦 Pacchetti: ${REQUIRED_PACKAGES[*]}"
+echo "🔍 Verifica installazione finale..."
+echo "Packages installati:"
+./vcpkg list | grep ":${TRIPLET}"
+
+echo ""
+echo "📁 Controllo directory problematiche:"
+if [ -d "installed/${TRIPLET}/debug" ]; then
+    echo "❌ Directory debug ancora presente:"
+    ls -la "installed/${TRIPLET}/debug/"
+    echo "🗑️  Rimozione forzata..."
+    rm -rf "installed/${TRIPLET}/debug"
+fi
+
+echo "✅ Directory debug: $([ -d "installed/${TRIPLET}/debug" ] && echo "PRESENTE" || echo "RIMOSSA")"
+
+echo ""
+echo "📁 Librerie release:"
+ls -la "installed/${TRIPLET}/lib/" | grep -E "\.(a|so)$" | head -5
+
+echo ""
+echo "🔧 Correzione permessi..."
+chown -R $USER:$USER "$VCPKG_PATH" 2>/dev/null || true
+
+echo ""
+echo "✅ Setup pulito completato!"
 echo ""
 echo "🚀 Ora puoi eseguire:"
-echo "   docker-compose -f docker-compose-tiny.yml up --build"
+echo "   docker-compose -f docker-compose-tiny.yml up builder"
