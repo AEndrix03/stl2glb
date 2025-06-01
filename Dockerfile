@@ -1,48 +1,64 @@
-# Dockerfile per Linux - Build con VCPKG montato dall'host
-# Ottimizzato per dimensioni minime e risorse limitate
+# Dockerfile che usa VCPKG montato dall'host
+# Richiede: docker build --build-arg VCPKG_DIR=/path/to/vcpkg -v /home/vcpkg:/vcpkg:ro
 
 # Stage 1: Builder
 FROM alpine:3.19 AS builder
 
-# Installa solo tools essenziali per la build
 RUN apk add --no-cache \
     build-base \
     cmake \
     ninja \
     linux-headers \
-    openssl-dev \
     && rm -rf /var/cache/apk/*
 
-# Working directory
 WORKDIR /build
 
 # Copia sorgenti
 COPY . .
 
-# Fix per Linux: aggiungi #include <cmath> se necessario
+# Fix per Linux
 RUN if [ -f "src/STLParser.cpp" ]; then \
     grep -q "#include <cmath>" src/STLParser.cpp || \
     sed -i '/#include <atomic>/a #include <cmath>' src/STLParser.cpp; \
     fi
 
-# Build con VCPKG montato da volume esterno
-# Nota: VCPKG_DIR sarà montato come volume in docker-compose
-ARG VCPKG_DIR=/vcpkg
-ARG BUILD_TYPE=MinSizeRel
+# Copia script di build
+COPY <<'EOF' /build/build.sh
+#!/bin/sh
+set -e
 
-RUN cmake -B build -S . \
-    -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-    -DCMAKE_TOOLCHAIN_FILE=${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake \
+VCPKG_DIR="${1:-/vcpkg}"
+BUILD_TYPE="${2:-MinSizeRel}"
+
+echo "Checking VCPKG at: $VCPKG_DIR"
+if [ ! -f "$VCPKG_DIR/scripts/buildsystems/vcpkg.cmake" ]; then
+    echo "ERROR: VCPKG not found at $VCPKG_DIR"
+    echo "Contents of $VCPKG_DIR:"
+    ls -la "$VCPKG_DIR" 2>/dev/null || echo "Directory not accessible"
+    exit 1
+fi
+
+echo "VCPKG found, starting build..."
+cmake -B build -S . \
+    -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+    -DCMAKE_TOOLCHAIN_FILE=$VCPKG_DIR/scripts/buildsystems/vcpkg.cmake \
     -DVCPKG_TARGET_TRIPLET=x64-linux \
-    -DVCPKG_INSTALLED_DIR=${VCPKG_DIR}/installed \
-    -GNinja \
-    && cmake --build build --config ${BUILD_TYPE} --parallel $(nproc) \
-    && strip build/stl2glb
+    -DVCPKG_INSTALLED_DIR=$VCPKG_DIR/installed \
+    -GNinja
 
-# Stage 2: Runtime minimale
+cmake --build build --config $BUILD_TYPE --parallel $(nproc)
+strip build/stl2glb
+echo "Build completed successfully!"
+EOF
+
+RUN chmod +x /build/build.sh
+
+# Il build effettivo avviene nel docker-compose con volume montato
+CMD ["/build/build.sh", "/vcpkg", "MinSizeRel"]
+
+# Stage 2: Runtime
 FROM alpine:3.19 AS runtime
 
-# Installa solo le runtime libraries essenziali
 RUN apk add --no-cache \
     libstdc++ \
     libgcc \
@@ -51,21 +67,15 @@ RUN apk add --no-cache \
     && rm -rf /var/cache/apk/* \
     && adduser -D -u 1000 -g 1000 appuser
 
-# Working directory
 WORKDIR /app
 
-# Copia solo l'eseguibile
-COPY --from=builder --chown=appuser:appuser /build/build/stl2glb /app/stl2glb
+# Nota: il file viene copiato dal builder tramite docker-compose
+COPY --from=builder --chown=appuser:appuser /build/build/stl2glb /app/stl2glb || true
 
-# Usa utente non-root
 USER appuser
-
-# Porta
 EXPOSE 8080
 
-# Health check endpoint
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
 
-# Entrypoint
 ENTRYPOINT ["/app/stl2glb"]
