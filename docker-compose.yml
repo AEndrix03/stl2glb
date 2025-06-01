@@ -15,9 +15,9 @@ services:
       - build_output:/output
     working_dir: /src
     command: |
-      sh -c "
+      /bin/sh -c '
       set -e
-      echo '🔧 Installing build dependencies...'
+      echo "🔧 Installing build dependencies..."
       apk add --no-cache \
         build-base \
         cmake \
@@ -26,89 +26,87 @@ services:
         openssl-dev \
         pkgconf
       
-      echo '📁 Creating clean build directory...'
+      echo "📁 Creating clean build directory..."
       rm -rf /build
       mkdir -p /build
       cd /build
       
-      echo '📋 Copying source files...'
+      echo "📋 Copying source files..."
       cp -r /src/* /build/
       cp -r /src/.* /build/ 2>/dev/null || true
-      # Escludi directory build se esiste
       rm -rf /build/build /build/cmake-build-* /build/CMakeCache.txt
       
-      echo '🔨 Fixing STLParser.cpp if needed...'
-      if [ -f 'src/STLParser.cpp' ]; then
-        grep -q '#include <cmath>' src/STLParser.cpp || \
-        sed -i '/#include <atomic>/a #include <cmath>' src/STLParser.cpp
+      echo "🔨 Fixing STLParser.cpp if needed..."
+      if [ -f "src/STLParser.cpp" ]; then
+        grep -q "#include <cmath>" src/STLParser.cpp || \
+        sed -i "/#include <atomic>/a #include <cmath>" src/STLParser.cpp
       fi
       
-      echo '🔍 Checking VCPKG installation...'
-      echo 'VCPKG root contents:'
+      echo "🔍 Checking VCPKG installation..."
+      echo "VCPKG root contents:"
       ls -la /vcpkg/
-      echo ''
-      echo 'VCPKG installed directory:'
+      echo ""
+      echo "VCPKG installed directory:"
       ls -la /vcpkg/installed/
-      echo ''
-      echo 'Available triplets:'
-      ls /vcpkg/installed/ | grep -E 'x64|linux' || echo 'No x64/linux triplets found'
+      echo ""
+      echo "Available triplets:"
+      ls /vcpkg/installed/ | grep -E "x64|linux" || echo "No x64/linux triplets found"
       
-      echo '🔍 Debug: Finding OpenSSL in VCPKG...'
-      find /vcpkg/installed -name '*openssl*' -type d | head -10
-      find /vcpkg/installed -name 'OpenSSLConfig.cmake' -o -name 'openssl-config.cmake' | head -10
+      echo "🔍 Debug: Finding OpenSSL in VCPKG..."
+      find /vcpkg/installed -name "*openssl*" -type d | head -10
+      find /vcpkg/installed -name "OpenSSLConfig.cmake" -o -name "openssl-config.cmake" | head -10
       
-      # Determina il triplet corretto
-      TRIPLET='x64-linux'
-      if [ -d '/vcpkg/installed/x64-linux-release' ]; then
-        TRIPLET='x64-linux-release'
-      elif [ -d '/vcpkg/installed/x64-linux-dynamic' ]; then
-        TRIPLET='x64-linux-dynamic'
+      TRIPLET="x64-linux"
+      if [ -d "/vcpkg/installed/x64-linux-release" ]; then
+        TRIPLET="x64-linux-release"
+      elif [ -d "/vcpkg/installed/x64-linux-dynamic" ]; then
+        TRIPLET="x64-linux-dynamic"
       fi
-      echo \"Using triplet: \$TRIPLET\"
+      echo "Using triplet: $TRIPLET"
       
-      echo '🔍 Checking libraries in triplet directory...'
-      ls -la /vcpkg/installed/\$TRIPLET/lib/ | grep -E 'ssl|crypto' || echo 'No OpenSSL libs found'
-      ls -la /vcpkg/installed/\$TRIPLET/include/ | grep openssl || echo 'No OpenSSL headers found'
+      echo "🔍 Checking libraries in triplet directory..."
+      ls -la /vcpkg/installed/$TRIPLET/lib/ | grep -E "ssl|crypto" || echo "No OpenSSL libs found"
+      ls -la /vcpkg/installed/$TRIPLET/include/ | grep openssl || echo "No OpenSSL headers found"
       
-      echo '🏗️ Building with VCPKG...'
+      echo "🏗️ Building with VCPKG..."
       export VCPKG_ROOT=/vcpkg
-      export PKG_CONFIG_PATH=/vcpkg/installed/\$TRIPLET/lib/pkgconfig:\$PKG_CONFIG_PATH
-      export OPENSSL_ROOT_DIR=/vcpkg/installed/\$TRIPLET
-      export OPENSSL_CRYPTO_LIBRARY=/vcpkg/installed/\$TRIPLET/lib/libcrypto.a
-      export OPENSSL_SSL_LIBRARY=/vcpkg/installed/\$TRIPLET/lib/libssl.a
-      export CMAKE_PREFIX_PATH=/vcpkg/installed/\$TRIPLET
+      export PKG_CONFIG_PATH=/vcpkg/installed/$TRIPLET/lib/pkgconfig:$PKG_CONFIG_PATH
+      export OPENSSL_ROOT_DIR=/vcpkg/installed/$TRIPLET
+      export OPENSSL_CRYPTO_LIBRARY=/vcpkg/installed/$TRIPLET/lib/libcrypto.a
+      export OPENSSL_SSL_LIBRARY=/vcpkg/installed/$TRIPLET/lib/libssl.a
+      export CMAKE_PREFIX_PATH=/vcpkg/installed/$TRIPLET
       
-      echo \"Environment variables set:\"
-      echo \"  OPENSSL_ROOT_DIR=\$OPENSSL_ROOT_DIR\"
-      echo \"  CMAKE_PREFIX_PATH=\$CMAKE_PREFIX_PATH\"
+      echo "Environment variables set:"
+      echo "  OPENSSL_ROOT_DIR=$OPENSSL_ROOT_DIR"
+      echo "  CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
       
       cmake -B build -S . \
         -DCMAKE_BUILD_TYPE=MinSizeRel \
         -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake \
-        -DVCPKG_TARGET_TRIPLET=\$TRIPLET \
+        -DVCPKG_TARGET_TRIPLET=$TRIPLET \
         -DVCPKG_INSTALLED_DIR=/vcpkg/installed \
         -DVCPKG_MANIFEST_MODE=OFF \
-        -DCMAKE_PREFIX_PATH=\"/vcpkg/installed/\$TRIPLET;/vcpkg/installed/\$TRIPLET/share\" \
-        -DOPENSSL_ROOT_DIR=/vcpkg/installed/\$TRIPLET \
-        -DOPENSSL_INCLUDE_DIR=/vcpkg/installed/\$TRIPLET/include \
-        -DOPENSSL_CRYPTO_LIBRARY=/vcpkg/installed/\$TRIPLET/lib/libcrypto.a \
-        -DOPENSSL_SSL_LIBRARY=/vcpkg/installed/\$TRIPLET/lib/libssl.a \
+        -DCMAKE_PREFIX_PATH="/vcpkg/installed/$TRIPLET;/vcpkg/installed/$TRIPLET/share" \
+        -DOPENSSL_ROOT_DIR=/vcpkg/installed/$TRIPLET \
+        -DOPENSSL_INCLUDE_DIR=/vcpkg/installed/$TRIPLET/include \
+        -DOPENSSL_CRYPTO_LIBRARY=/vcpkg/installed/$TRIPLET/lib/libcrypto.a \
+        -DOPENSSL_SSL_LIBRARY=/vcpkg/installed/$TRIPLET/lib/libssl.a \
         -GNinja \
         -DCMAKE_VERBOSE_MAKEFILE=ON
       
-      echo '🔨 Building project...'
+      echo "🔨 Building project..."
       cmake --build build --config MinSizeRel --parallel
       
-      echo '✂️ Stripping executable...'
+      echo "✂️ Stripping executable..."
       strip build/stl2glb
       
-      echo '📦 Copying to output...'
+      echo "📦 Copying to output..."
       cp build/stl2glb /output/
-      echo 'Output contents:'
+      echo "Output contents:"
       ls -la /output/
       
-      echo '✅ Build completed!'
-      "
+      echo "✅ Build completed!"
+      '
     networks:
       - stl2glb-net
 
