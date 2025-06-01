@@ -7,7 +7,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /opt/vcpkg
+      device: /home/vcpkg
       o: bind
 
 networks:
@@ -30,7 +30,7 @@ services:
       echo '🔍 Verifica vcpkg...' &&
       ls -la /vcpkg/ &&
       if [ ! -f '/vcpkg/vcpkg' ]; then
-        echo '❌ vcpkg non trovato in /opt/vcpkg';
+        echo '❌ vcpkg non trovato in /home/vcpkg';
         echo '🔧 Esegui prima: ./setup-vcpkg.sh';
         exit 1;
       fi &&
@@ -62,7 +62,14 @@ services:
 
   # Stage 2: Runtime minimale
   app:
-    image: alpine:3.19
+    build:
+      context: .
+      dockerfile: Dockerfile-tiny
+      # Mount vcpkg durante il build (richiede Docker Compose 2.17+)
+      additional_contexts:
+        vcpkg: /home/vcpkg
+
+    image: stl2glb:tiny
     container_name: stl2glb_tiny
     depends_on:
       builder:

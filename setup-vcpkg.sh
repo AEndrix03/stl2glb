@@ -26,8 +26,8 @@ echo "║                    STL2GLB Converter v2.0                 ║"
 echo "╚═══════════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 
-# Chiedi directory per vcpkg (default: /opt/vcpkg)
-DEFAULT_DIR="/opt/vcpkg"
+# Chiedi directory per vcpkg (default: /home/vcpkg)
+DEFAULT_DIR="/home/vcpkg"
 read -p "📁 Directory per vcpkg [$DEFAULT_DIR]: " VCPKG_DIR
 VCPKG_DIR=${VCPKG_DIR:-$DEFAULT_DIR}
 
