@@ -23,7 +23,35 @@ services:
       - ./:/project
       - vcpkg_cache:/vcpkg:ro
     working_dir: /project
-    command: ["sh", "./build-internal.sh"]
+    command: >
+      sh -c "
+      echo '🔧 Installazione build tools...' &&
+      apk add --no-cache build-base cmake ninja linux-headers &&
+      echo '🔍 Verifica vcpkg...' &&
+      ls -la /vcpkg/ &&
+      if [ ! -f '/vcpkg/vcpkg' ]; then
+        echo '❌ vcpkg non trovato in /home/vcpkg';
+        echo '🔧 Esegui prima: ./setup-vcpkg.sh';
+        exit 1;
+      fi &&
+      if [ ! -d '/vcpkg/installed/x64-linux' ]; then
+        echo '❌ dipendenze vcpkg x64-linux non installate';
+        echo '📦 Directory installed disponibili:';
+        ls -la /vcpkg/installed/ 2>/dev/null || echo 'Directory installed non trovata';
+        exit 1;
+      fi &&
+      echo '✅ vcpkg verificato' &&
+      echo '🔨 Fix per Linux se necessario...' &&
+      if [ -f 'src/STLParser.cpp' ]; then
+        grep -q '#include <cmath>' src/STLParser.cpp ||
+        sed -i '/#include <atomic>/a #include <cmath>' src/STLParser.cpp;
+      fi &&
+      echo '🏗️  Build con vcpkg...' &&
+      cmake -B build -S . -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux -DVCPKG_INSTALLED_DIR=/vcpkg/installed -GNinja -DCMAKE_PREFIX_PATH=/vcpkg/installed/x64-linux &&
+      cmake --build build --config MinSizeRel --parallel \$(nproc) &&
+      strip build/stl2glb_exec &&
+      echo '✅ Build completato'
+      "
     networks:
       - stl2glb-network
 
