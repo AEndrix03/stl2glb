@@ -22,34 +22,46 @@ echo "🏗️  Bootstrap vcpkg..."
 ./bootstrap-vcpkg.sh -disableMetrics
 
 echo "📦 Installazione dipendenze solo release..."
-PACKAGES=("openssl" "nlohmann-json" "httplib")
+PACKAGES=("openssl" "nlohmann-json" "cpp-httplib")
 
 for PKG in "${PACKAGES[@]}"; do
     echo "Installing $PKG..."
-    if ! ./vcpkg install "${PKG}:${TRIPLET}" --only-release; then
-        echo "⚠️  --only-release failed, trying normal install..."
-        ./vcpkg install "${PKG}:${TRIPLET}"
+    # Prova senza --only-release (non supportato in questa versione)
+    if ./vcpkg install "${PKG}:${TRIPLET}"; then
+        echo "✅ $PKG installato"
 
         # Rimuovi debug se esiste
         if [ -d "installed/${TRIPLET}/debug" ]; then
             echo "🗑️  Rimozione debug per $PKG..."
             rm -rf "installed/${TRIPLET}/debug"
         fi
+    else
+        echo "❌ Fallito: $PKG"
+        if [[ "$PKG" == "cpp-httplib" ]]; then
+            echo "⚠️  Provo con httplib..."
+            if ./vcpkg install "httplib:${TRIPLET}"; then
+                echo "✅ httplib installato"
+            fi
+        fi
     fi
 done
 
 # Draco opzionale
 echo "📦 Installazione draco (opzionale)..."
-if ./vcpkg install "draco:${TRIPLET}" --only-release; then
+if ./vcpkg install "draco:${TRIPLET}"; then
     echo "✅ Draco installato"
-elif ./vcpkg install "draco:${TRIPLET}"; then
-    echo "✅ Draco installato (con debug)"
     if [ -d "installed/${TRIPLET}/debug" ]; then
         echo "🗑️  Rimozione debug draco..."
         rm -rf "installed/${TRIPLET}/debug"
     fi
 else
     echo "⚠️  Draco failed - continuing without"
+fi
+
+# Pulizia finale di tutte le directory debug
+echo "🗑️  Pulizia finale debug..."
+if [ -d "installed/${TRIPLET}/debug" ]; then
+    rm -rf "installed/${TRIPLET}/debug"
 fi
 
 echo ""
