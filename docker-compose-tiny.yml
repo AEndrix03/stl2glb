@@ -8,33 +8,11 @@ services:
   app:
     build:
       context: .
-      dockerfile_inline: |
-        # Build stage ultra-compatto
-        FROM alpine:3.19 AS builder
-        
-        # Installa solo il minimo per compilare
-        RUN apk add --no-cache \
-            build-base cmake ninja ccache \
-            openssl-dev linux-headers
-        
-        WORKDIR /build
-        COPY . .
-        
-        # Build con vcpkg esterno
-        RUN --mount=type=bind,source=${VCPKG_HOST_DIR:-/opt/vcpkg},target=/vcpkg,ro \
-            --mount=type=cache,target=/root/.ccache \
-            cmake -B build -S . \
-                -DCMAKE_BUILD_TYPE=MinSizeRel \
-                -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake \
-                -DVCPKG_TARGET_TRIPLET=x64-linux-static \
-                -GNinja && \
-            cmake --build build --config MinSizeRel
-        
-        # Runtime con distroless (12MB!)
-        FROM gcr.io/distroless/static-debian12:nonroot
-        COPY --from=builder /build/build/stl2glb_exec /stl2glb_exec
-        EXPOSE 8080
-        ENTRYPOINT ["/stl2glb_exec"]
+      dockerfile: Dockerfile-tiny
+      args:
+        VCPKG_DIR: ${VCPKG_HOST_DIR:-/opt/vcpkg}
+    volumes:
+      - ${VCPKG_HOST_DIR:-/opt/vcpkg}:/vcpkg:ro
 
     image: stl2glb:tiny
     container_name: stl2glb_tiny

@@ -1,0 +1,60 @@
+# Dockerfile-tiny - Build ultra-minimale per VPS con risorse limitate
+# Richiede vcpkg pre-installato sull'host montato come volume
+
+# Stage 1: Builder Alpine minimale
+FROM alpine:3.19 AS builder
+
+# Installa solo il minimo indispensabile per compilare
+RUN apk add --no-cache \
+    build-base \
+    cmake \
+    ninja \
+    openssl-dev \
+    linux-headers \
+    # Per static linking
+    musl-dev \
+    zlib-static \
+    openssl-libs-static
+
+# Working directory
+WORKDIR /build
+
+# Copia sorgenti
+COPY . .
+
+# Fix per Linux: aggiungi #include <cmath> se manca
+RUN grep -q "#include <cmath>" src/STLParser.cpp || \
+    sed -i '/#include <atomic>/a #include <cmath>' src/STLParser.cpp
+
+# Build con vcpkg montato come volume esterno
+# NOTA: vcpkg sarà montato in /vcpkg dal docker-compose
+RUN cmake -B build -S . \
+    -DCMAKE_BUILD_TYPE=MinSizeRel \
+    -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake \
+    -DVCPKG_TARGET_TRIPLET=x64-linux \
+    -DVCPKG_INSTALLED_DIR=/vcpkg/installed \
+    -DUSE_STATIC_LIBS=OFF \
+    -GNinja && \
+    cmake --build build --config MinSizeRel --parallel $(nproc)
+
+# Strip dell'eseguibile per ridurre dimensioni
+RUN strip build/stl2glb_exec
+
+# Stage 2: Runtime ultra-minimale con distroless
+FROM gcr.io/distroless/cc-debian12:nonroot AS runtime
+
+# Copia solo l'eseguibile
+COPY --from=builder --chown=nonroot:nonroot /build/build/stl2glb_exec /app/stl2glb_exec
+
+# Working directory
+WORKDIR /app
+
+# Porta
+EXPOSE 8080
+
+# Health check endpoint integrato nell'app
+HEALTHCHECK --interval=60s --timeout=5s --start_period=20s --retries=2 \
+    CMD ["/app/stl2glb_exec", "--health"]
+
+# Entrypoint
+ENTRYPOINT ["/app/stl2glb_exec"]
