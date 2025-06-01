@@ -1,40 +1,45 @@
-# Dockerfile-tiny-fast - Build veloce usando vcpkg pre-installato dall'host
+# Dockerfile-tiny - RICHIEDE vcpkg pre-installato in /opt/vcpkg
+# NON installa vcpkg automaticamente - fallisce se non presente
 # syntax=docker/dockerfile:1.4
 
 FROM alpine:3.19 AS builder
 
-# Argomenti per vcpkg
-ARG VCPKG_ROOT=/opt/vcpkg
-
-# Installa build tools
+# Installa solo build tools essenziali
 RUN apk add --no-cache \
     build-base \
     cmake \
     ninja \
-    linux-headers \
-    git \
-    bash \
-    curl \
-    zip \
-    unzip \
-    tar \
-    pkg-config
-
-# Installa vcpkg se non è disponibile come mount
-RUN --mount=type=bind,source=/opt/vcpkg,target=/host-vcpkg,ro \
-    if [ -d "/host-vcpkg" ] && [ -f "/host-vcpkg/vcpkg" ]; then \
-        echo "Usando vcpkg dall'host..."; \
-        cp -r /host-vcpkg /vcpkg; \
-    else \
-        echo "Installando vcpkg da zero..."; \
-        git clone --depth 1 https://github.com/Microsoft/vcpkg.git /vcpkg && \
-        /vcpkg/bootstrap-vcpkg.sh && \
-        /vcpkg/vcpkg install --triplet=x64-linux --clean-after-build \
-        nlohmann-json httplib openssl; \
-    fi
+    linux-headers
 
 # Working directory
 WORKDIR /build
+
+# CONTROLLO OBBLIGATORIO: vcpkg deve essere presente nell'host
+# Questo comando fallisce immediatamente se /opt/vcpkg non esiste
+RUN --mount=type=bind,source=/opt/vcpkg,target=/vcpkg,ro \
+    if [ ! -d "/vcpkg" ]; then \
+        echo "❌ ERRORE: vcpkg non trovato in /opt/vcpkg"; \
+        echo "🔧 SETUP RICHIESTO: Esegui prima il setup di vcpkg"; \
+        echo "   sudo mkdir -p /opt && cd /opt"; \
+        echo "   sudo git clone https://github.com/Microsoft/vcpkg.git"; \
+        echo "   sudo chown -R \$USER:\$USER /opt/vcpkg"; \
+        echo "   cd /opt/vcpkg && ./bootstrap-vcpkg.sh"; \
+        echo "   ./vcpkg install --triplet=x64-linux nlohmann-json httplib openssl"; \
+        exit 1; \
+    fi && \
+    if [ ! -f "/vcpkg/vcpkg" ]; then \
+        echo "❌ ERRORE: vcpkg non inizializzato correttamente"; \
+        echo "🔧 ESEGUI: cd /opt/vcpkg && ./bootstrap-vcpkg.sh"; \
+        exit 1; \
+    fi && \
+    if [ ! -d "/vcpkg/installed/x64-linux" ]; then \
+        echo "❌ ERRORE: dipendenze vcpkg non installate"; \
+        echo "🔧 ESEGUI: cd /opt/vcpkg && ./vcpkg install --triplet=x64-linux nlohmann-json httplib openssl"; \
+        exit 1; \
+    fi && \
+    echo "✅ vcpkg verificato correttamente" && \
+    # Copia vcpkg nel container per il build
+    cp -r /vcpkg /tmp/vcpkg
 
 # Copia sorgenti
 COPY . .
@@ -48,9 +53,9 @@ RUN if [ -f "src/STLParser.cpp" ]; then \
 # Build ottimizzata
 RUN cmake -B build -S . \
     -DCMAKE_BUILD_TYPE=MinSizeRel \
-    -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake \
+    -DCMAKE_TOOLCHAIN_FILE=/tmp/vcpkg/scripts/buildsystems/vcpkg.cmake \
     -DVCPKG_TARGET_TRIPLET=x64-linux \
-    -DVCPKG_INSTALLED_DIR=/vcpkg/installed \
+    -DVCPKG_INSTALLED_DIR=/tmp/vcpkg/installed \
     -GNinja && \
     cmake --build build --config MinSizeRel --parallel $(nproc) && \
     strip build/stl2glb_exec

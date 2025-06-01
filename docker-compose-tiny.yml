@@ -1,21 +1,19 @@
-# Docker Compose ottimizzato per VPS con vcpkg dall'host
+# Docker Compose per stl2glb - RICHIEDE setup vcpkg
+# PREREQUISITO: Eseguire prima ./setup-vcpkg.sh
 
 services:
-  # App ultra-minimale per VPS
   app:
     build:
       context: .
       dockerfile: Dockerfile-tiny
-      args:
-        - VCPKG_ROOT=/opt/vcpkg
-      # Per montare vcpkg durante il build, usa il target specifico
-      target: builder
+      # Abilita BuildKit per il mount bind
+      platforms:
+        - linux/amd64
 
-    # Immagine finale ottimizzata
     image: stl2glb:tiny
     container_name: stl2glb_tiny
 
-    # Configurazione minimale
+    # Configurazione sicurezza
     restart: unless-stopped
     read_only: true
     security_opt:
@@ -33,17 +31,17 @@ services:
       - MALLOC_ARENA_MAX=1
       - GOMAXPROCS=1
 
-    # DNS cache locale
+    # DNS ottimizzato
     dns:
       - 127.0.0.1
       - 1.1.1.1
 
-    # Host MinIO
+    # Host esterni
     extra_hosts:
       - "minio:217.160.248.228"
       - "minio.aredegalli.it:217.160.248.228"
 
-    # Risorse ultra-limitate per VPS economiche
+    # Risorse limitate per VPS
     deploy:
       resources:
         limits:
@@ -54,7 +52,7 @@ services:
           cpus: '0.1'
           memory: 64M
 
-    # Health check corretto
+    # Health check
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
       interval: 60s
@@ -62,7 +60,7 @@ services:
       retries: 2
       start_period: 20s
 
-    # Logging minimale
+    # Logging ottimizzato
     logging:
       driver: "json-file"
       options:
@@ -70,12 +68,12 @@ services:
         max-file: "1"
         compress: "true"
 
-    # Sysctls per performance su risorse limitate
+    # Tuning di rete
     sysctls:
       - net.core.somaxconn=128
       - net.ipv4.tcp_fin_timeout=30
       - net.ipv4.tcp_keepalive_time=600
 
-    # Tmpfs minimale
+    # Tmpfs per file temporanei
     tmpfs:
       - /tmp:size=50M,noexec,nosuid,nodev
