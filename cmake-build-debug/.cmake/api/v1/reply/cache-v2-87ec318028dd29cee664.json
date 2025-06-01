@@ -1326,6 +1326,18 @@
 			"value" : "[D:/Progetti/vcpkg/installed/x64-windows/share/nlohmann_json/nlohmann_jsonConfig.cmake][v3.12.0()]"
 		},
 		{
+			"name" : "HAVE_CMATH",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Have include cmath"
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "1"
+		},
+		{
 			"name" : "INIH_INIHLIB_DEBUG",
 			"properties" : 
 			[

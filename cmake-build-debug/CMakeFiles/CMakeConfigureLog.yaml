@@ -284,3 +284,37 @@ events:
         
       exitCode: 0
 ...
+
+---
+events:
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "E:/Jetbrains/CLion 2025.1/bin/cmake/win/x64/share/cmake-3.31/Modules/CheckIncludeFileCXX.cmake:98 (try_compile)"
+      - "CMakeLists.txt:63 (check_include_file_cxx)"
+    checks:
+      - "Looking for C++ include cmath"
+    directories:
+      source: "D:/Progetti/stl2glb/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-4czk1y"
+      binary: "D:/Progetti/stl2glb/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-4czk1y"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: " -Wall -Wextra"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "D:/Progetti/vcpkg/installed/x64-windows/share/httplib"
+      VCPKG_INSTALLED_DIR: "D:/Progetti/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/Progetti/vcpkg"
+    buildResult:
+      variable: "HAVE_CMATH"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Progetti/stl2glb/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-4czk1y'
+        
+        Run Build Command(s): "E:/Jetbrains/CLion 2025.1/bin/ninja/win/x64/ninja.exe" -v cmTC_fdcb3
+        [1/2] "E:\\Jetbrains\\CLion 2025.1\\bin\\mingw\\bin\\g++.exe"   -Wall -Wextra  -std=gnu++17 -fdiagnostics-color=always -o CMakeFiles/cmTC_fdcb3.dir/CheckIncludeFile.cxx.obj -c D:/Progetti/stl2glb/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-4czk1y/CheckIncludeFile.cxx
+        [2/2] C:\\WINDOWS\\system32\\cmd.exe /C "cd . && "E:\\Jetbrains\\CLion 2025.1\\bin\\mingw\\bin\\g++.exe" -Wall -Wextra  CMakeFiles/cmTC_fdcb3.dir/CheckIncludeFile.cxx.obj -o cmTC_fdcb3.exe -Wl,--out-implib,libcmTC_fdcb3.dll.a -Wl,--major-image-version,0,--minor-image-version,0  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 && cd ."
+        
+      exitCode: 0
+...

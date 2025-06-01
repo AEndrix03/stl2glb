@@ -15,13 +15,11 @@
 		[
 			"_add_executable",
 			"add_executable",
-			"install",
 			"target_link_libraries",
 			"set_target_properties",
 			"include",
 			"_find_package",
-			"find_package",
-			"add_definitions"
+			"find_package"
 		],
 		"files" : 
 		[
@@ -38,7 +36,7 @@
 			{
 				"command" : 1,
 				"file" : 1,
-				"line" : 159,
+				"line" : 146,
 				"parent" : 0
 			},
 			{
@@ -50,69 +48,57 @@
 			{
 				"command" : 2,
 				"file" : 1,
-				"line" : 193,
+				"line" : 147,
 				"parent" : 0
 			},
 			{
-				"command" : 3,
+				"command" : 2,
 				"file" : 1,
-				"line" : 160,
-				"parent" : 0
-			},
-			{
-				"command" : 3,
-				"file" : 1,
-				"line" : 126,
-				"parent" : 0
-			},
-			{
-				"command" : 7,
-				"file" : 1,
-				"line" : 76,
+				"line" : 92,
 				"parent" : 0
 			},
 			{
 				"command" : 6,
-				"file" : 0,
-				"line" : 893,
-				"parent" : 6
-			},
-			{
-				"file" : 3,
-				"parent" : 7
+				"file" : 1,
+				"line" : 47,
+				"parent" : 0
 			},
 			{
 				"command" : 5,
-				"file" : 3,
-				"line" : 99,
-				"parent" : 8
+				"file" : 0,
+				"line" : 893,
+				"parent" : 5
 			},
 			{
-				"file" : 2,
-				"parent" : 9
+				"file" : 3,
+				"parent" : 6
 			},
 			{
 				"command" : 4,
+				"file" : 3,
+				"line" : 99,
+				"parent" : 7
+			},
+			{
+				"file" : 2,
+				"parent" : 8
+			},
+			{
+				"command" : 3,
 				"file" : 2,
 				"line" : 60,
-				"parent" : 10
+				"parent" : 9
 			},
 			{
-				"command" : 3,
+				"command" : 2,
 				"file" : 1,
-				"line" : 136,
+				"line" : 117,
 				"parent" : 0
 			},
 			{
-				"command" : 3,
+				"command" : 2,
 				"file" : 1,
-				"line" : 141,
-				"parent" : 0
-			},
-			{
-				"command" : 8,
-				"file" : 1,
-				"line" : 83,
+				"line" : 138,
 				"parent" : 0
 			}
 		]
@@ -123,36 +109,32 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : " -Wall -Wextra -Wpedantic -g -std=gnu++17 -fdiagnostics-color=always"
+					"fragment" : " -Wall -Wextra -g -std=gnu++17 -fdiagnostics-color=always"
 				}
 			],
 			"defines" : 
 			[
 				{
-					"backtrace" : 4,
+					"backtrace" : 3,
 					"define" : "BROTLI_SHARED_COMPILATION"
 				},
 				{
-					"backtrace" : 4,
+					"backtrace" : 3,
 					"define" : "CPPHTTPLIB_BROTLI_SUPPORT"
-				},
-				{
-					"backtrace" : 14,
-					"define" : "USE_DRACO"
 				}
 			],
 			"includes" : 
 			[
 				{
-					"backtrace" : 4,
+					"backtrace" : 3,
 					"path" : "D:/Progetti/stl2glb/include"
 				},
 				{
-					"backtrace" : 4,
+					"backtrace" : 3,
 					"path" : "D:/Progetti/stl2glb/external/tinygltf"
 				},
 				{
-					"backtrace" : 4,
+					"backtrace" : 3,
 					"isSystem" : true,
 					"path" : "D:/Progetti/vcpkg/installed/x64-windows/include"
 				}
@@ -162,7 +144,7 @@
 			{
 				"backtraces" : 
 				[
-					4
+					3
 				],
 				"standard" : "17"
 			},
@@ -175,31 +157,17 @@
 	"dependencies" : 
 	[
 		{
-			"backtrace" : 4,
+			"backtrace" : 3,
 			"id" : "stl2glb::@6890427a1f51a3e7e1df"
 		}
 	],
 	"id" : "stl2glb_exec::@6890427a1f51a3e7e1df",
-	"install" : 
-	{
-		"destinations" : 
-		[
-			{
-				"backtrace" : 3,
-				"path" : "bin"
-			}
-		],
-		"prefix" : 
-		{
-			"path" : "C:/Program Files (x86)/stl2glb"
-		}
-	},
 	"link" : 
 	{
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "-Wall -Wextra -Wpedantic -g",
+				"fragment" : "-Wall -Wextra -g",
 				"role" : "flags"
 			},
 			{
@@ -207,58 +175,58 @@
 				"role" : "flags"
 			},
 			{
-				"backtrace" : 4,
+				"backtrace" : 3,
 				"fragment" : "libstl2glb.a",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 5,
-				"fragment" : "D:\\Progetti\\vcpkg\\installed\\x64-windows\\debug\\lib\\libssl.lib",
+				"backtrace" : 4,
+				"fragment" : "-lpthread",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 5,
-				"fragment" : "D:\\Progetti\\vcpkg\\installed\\x64-windows\\debug\\lib\\libcrypto.lib",
+				"backtrace" : 4,
+				"fragment" : "-ldl",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 11,
-				"fragment" : "D:\\Progetti\\vcpkg\\installed\\x64-windows\\debug\\lib\\brotlienc.lib",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 11,
-				"fragment" : "D:\\Progetti\\vcpkg\\installed\\x64-windows\\debug\\lib\\brotlidec.lib",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 11,
-				"fragment" : "D:\\Progetti\\vcpkg\\installed\\x64-windows\\debug\\lib\\brotlicommon.lib",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 12,
-				"fragment" : "D:\\Progetti\\vcpkg\\installed\\x64-windows\\debug\\lib\\draco.lib",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 13,
+				"backtrace" : 10,
 				"fragment" : "-lws2_32",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 13,
+				"backtrace" : 10,
 				"fragment" : "-lcrypt32",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 13,
-				"fragment" : "-lbcrypt",
+				"backtrace" : 10,
+				"fragment" : "D:\\Progetti\\vcpkg\\installed\\x64-windows\\lib\\brotlienc.lib",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 13,
-				"fragment" : "-lwinhttp",
+				"backtrace" : 10,
+				"fragment" : "D:\\Progetti\\vcpkg\\installed\\x64-windows\\lib\\brotlidec.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 10,
+				"fragment" : "D:\\Progetti\\vcpkg\\installed\\x64-windows\\lib\\brotlicommon.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 11,
+				"fragment" : "OpenSSL::SSL-NOTFOUND",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 11,
+				"fragment" : "OpenSSL::Crypto-NOTFOUND",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 12,
+				"fragment" : "D:\\Progetti\\vcpkg\\installed\\x64-windows\\lib\\draco.lib",
 				"role" : "libraries"
 			},
 			{
@@ -301,7 +269,7 @@
 			"sourceGroupIndex" : 0
 		},
 		{
-			"backtrace" : 4,
+			"backtrace" : 3,
 			"path" : "D:/Progetti/vcpkg/installed/x64-windows/share/nlohmann_json/nlohmann_json.natvis",
 			"sourceGroupIndex" : 1
 		}

@@ -15,7 +15,6 @@
 			"add_library",
 			"target_link_libraries",
 			"target_compile_definitions",
-			"add_definitions",
 			"target_include_directories"
 		],
 		"files" : 
@@ -31,7 +30,7 @@
 			{
 				"command" : 1,
 				"file" : 1,
-				"line" : 107,
+				"line" : 74,
 				"parent" : 0
 			},
 			{
@@ -43,25 +42,31 @@
 			{
 				"command" : 2,
 				"file" : 1,
-				"line" : 126,
+				"line" : 108,
 				"parent" : 0
 			},
 			{
 				"command" : 3,
 				"file" : 1,
-				"line" : 110,
+				"line" : 77,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 1,
+				"line" : 139,
 				"parent" : 0
 			},
 			{
 				"command" : 4,
 				"file" : 1,
-				"line" : 83,
+				"line" : 86,
 				"parent" : 0
 			},
 			{
-				"command" : 5,
+				"command" : 2,
 				"file" : 1,
-				"line" : 120,
+				"line" : 100,
 				"parent" : 0
 			}
 		]
@@ -72,7 +77,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : " -Wall -Wextra -Wpedantic -g -std=gnu++17 -fdiagnostics-color=always"
+					"fragment" : " -Wall -Wextra -g -std=gnu++17 -fdiagnostics-color=always"
 				}
 			],
 			"defines" : 
@@ -84,6 +89,10 @@
 				{
 					"backtrace" : 3,
 					"define" : "CPPHTTPLIB_BROTLI_SUPPORT"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "NDEBUG"
 				},
 				{
 					"backtrace" : 4,
@@ -117,7 +126,7 @@
 					"path" : "D:/Progetti/stl2glb/external/tinygltf"
 				},
 				{
-					"backtrace" : 3,
+					"backtrace" : 7,
 					"isSystem" : true,
 					"path" : "D:/Progetti/vcpkg/installed/x64-windows/include"
 				}
@@ -127,7 +136,7 @@
 			{
 				"backtraces" : 
 				[
-					3
+					7
 				],
 				"standard" : "17"
 			},
@@ -243,7 +252,7 @@
 			"sourceGroupIndex" : 0
 		},
 		{
-			"backtrace" : 3,
+			"backtrace" : 7,
 			"path" : "D:/Progetti/vcpkg/installed/x64-windows/share/nlohmann_json/nlohmann_json.natvis",
 			"sourceGroupIndex" : 1
 		}

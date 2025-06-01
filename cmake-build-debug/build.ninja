@@ -50,81 +50,81 @@ cmake_ninja_workdir = D$:/Progetti/stl2glb/cmake-build-debug/
 build cmake_object_order_depends_target_stl2glb: phony || .
 
 build CMakeFiles/stl2glb.dir/src/Converter.cpp.obj: CXX_COMPILER__stl2glb_unscanned_Debug D$:/Progetti/stl2glb/src/Converter.cpp || cmake_object_order_depends_target_stl2glb
-  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
+  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DNDEBUG -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
   DEP_FILE = CMakeFiles\stl2glb.dir\src\Converter.cpp.obj.d
-  FLAGS = -Wall -Wextra -Wpedantic -g -std=gnu++17 -fdiagnostics-color=always
+  FLAGS = -Wall -Wextra -g -std=gnu++17 -fdiagnostics-color=always
   INCLUDES = -ID:/Progetti/stl2glb/include -ID:/Progetti/stl2glb/external/tinygltf -isystem D:/Progetti/vcpkg/installed/x64-windows/include
   OBJECT_DIR = CMakeFiles\stl2glb.dir
   OBJECT_FILE_DIR = CMakeFiles\stl2glb.dir\src
 
 build CMakeFiles/stl2glb.dir/src/EnvironmentHandler.cpp.obj: CXX_COMPILER__stl2glb_unscanned_Debug D$:/Progetti/stl2glb/src/EnvironmentHandler.cpp || cmake_object_order_depends_target_stl2glb
-  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
+  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DNDEBUG -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
   DEP_FILE = CMakeFiles\stl2glb.dir\src\EnvironmentHandler.cpp.obj.d
-  FLAGS = -Wall -Wextra -Wpedantic -g -std=gnu++17 -fdiagnostics-color=always
+  FLAGS = -Wall -Wextra -g -std=gnu++17 -fdiagnostics-color=always
   INCLUDES = -ID:/Progetti/stl2glb/include -ID:/Progetti/stl2glb/external/tinygltf -isystem D:/Progetti/vcpkg/installed/x64-windows/include
   OBJECT_DIR = CMakeFiles\stl2glb.dir
   OBJECT_FILE_DIR = CMakeFiles\stl2glb.dir\src
 
 build CMakeFiles/stl2glb.dir/src/GLBWriter.cpp.obj: CXX_COMPILER__stl2glb_unscanned_Debug D$:/Progetti/stl2glb/src/GLBWriter.cpp || cmake_object_order_depends_target_stl2glb
-  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
+  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DNDEBUG -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
   DEP_FILE = CMakeFiles\stl2glb.dir\src\GLBWriter.cpp.obj.d
-  FLAGS = -Wall -Wextra -Wpedantic -g -std=gnu++17 -fdiagnostics-color=always
+  FLAGS = -Wall -Wextra -g -std=gnu++17 -fdiagnostics-color=always
   INCLUDES = -ID:/Progetti/stl2glb/include -ID:/Progetti/stl2glb/external/tinygltf -isystem D:/Progetti/vcpkg/installed/x64-windows/include
   OBJECT_DIR = CMakeFiles\stl2glb.dir
   OBJECT_FILE_DIR = CMakeFiles\stl2glb.dir\src
 
 build CMakeFiles/stl2glb.dir/src/Hasher.cpp.obj: CXX_COMPILER__stl2glb_unscanned_Debug D$:/Progetti/stl2glb/src/Hasher.cpp || cmake_object_order_depends_target_stl2glb
-  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
+  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DNDEBUG -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
   DEP_FILE = CMakeFiles\stl2glb.dir\src\Hasher.cpp.obj.d
-  FLAGS = -Wall -Wextra -Wpedantic -g -std=gnu++17 -fdiagnostics-color=always
+  FLAGS = -Wall -Wextra -g -std=gnu++17 -fdiagnostics-color=always
   INCLUDES = -ID:/Progetti/stl2glb/include -ID:/Progetti/stl2glb/external/tinygltf -isystem D:/Progetti/vcpkg/installed/x64-windows/include
   OBJECT_DIR = CMakeFiles\stl2glb.dir
   OBJECT_FILE_DIR = CMakeFiles\stl2glb.dir\src
 
 build CMakeFiles/stl2glb.dir/src/Logger.cpp.obj: CXX_COMPILER__stl2glb_unscanned_Debug D$:/Progetti/stl2glb/src/Logger.cpp || cmake_object_order_depends_target_stl2glb
-  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
+  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DNDEBUG -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
   DEP_FILE = CMakeFiles\stl2glb.dir\src\Logger.cpp.obj.d
-  FLAGS = -Wall -Wextra -Wpedantic -g -std=gnu++17 -fdiagnostics-color=always
+  FLAGS = -Wall -Wextra -g -std=gnu++17 -fdiagnostics-color=always
   INCLUDES = -ID:/Progetti/stl2glb/include -ID:/Progetti/stl2glb/external/tinygltf -isystem D:/Progetti/vcpkg/installed/x64-windows/include
   OBJECT_DIR = CMakeFiles\stl2glb.dir
   OBJECT_FILE_DIR = CMakeFiles\stl2glb.dir\src
 
 build CMakeFiles/stl2glb.dir/src/STLParser.cpp.obj: CXX_COMPILER__stl2glb_unscanned_Debug D$:/Progetti/stl2glb/src/STLParser.cpp || cmake_object_order_depends_target_stl2glb
-  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
+  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DNDEBUG -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
   DEP_FILE = CMakeFiles\stl2glb.dir\src\STLParser.cpp.obj.d
-  FLAGS = -Wall -Wextra -Wpedantic -g -std=gnu++17 -fdiagnostics-color=always
+  FLAGS = -Wall -Wextra -g -std=gnu++17 -fdiagnostics-color=always
   INCLUDES = -ID:/Progetti/stl2glb/include -ID:/Progetti/stl2glb/external/tinygltf -isystem D:/Progetti/vcpkg/installed/x64-windows/include
   OBJECT_DIR = CMakeFiles\stl2glb.dir
   OBJECT_FILE_DIR = CMakeFiles\stl2glb.dir\src
 
 build CMakeFiles/stl2glb.dir/src/Server.cpp.obj: CXX_COMPILER__stl2glb_unscanned_Debug D$:/Progetti/stl2glb/src/Server.cpp || cmake_object_order_depends_target_stl2glb
-  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
+  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DNDEBUG -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
   DEP_FILE = CMakeFiles\stl2glb.dir\src\Server.cpp.obj.d
-  FLAGS = -Wall -Wextra -Wpedantic -g -std=gnu++17 -fdiagnostics-color=always
+  FLAGS = -Wall -Wextra -g -std=gnu++17 -fdiagnostics-color=always
   INCLUDES = -ID:/Progetti/stl2glb/include -ID:/Progetti/stl2glb/external/tinygltf -isystem D:/Progetti/vcpkg/installed/x64-windows/include
   OBJECT_DIR = CMakeFiles\stl2glb.dir
   OBJECT_FILE_DIR = CMakeFiles\stl2glb.dir\src
 
 build CMakeFiles/stl2glb.dir/src/main.cpp.obj: CXX_COMPILER__stl2glb_unscanned_Debug D$:/Progetti/stl2glb/src/main.cpp || cmake_object_order_depends_target_stl2glb
-  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
+  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DNDEBUG -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
   DEP_FILE = CMakeFiles\stl2glb.dir\src\main.cpp.obj.d
-  FLAGS = -Wall -Wextra -Wpedantic -g -std=gnu++17 -fdiagnostics-color=always
+  FLAGS = -Wall -Wextra -g -std=gnu++17 -fdiagnostics-color=always
   INCLUDES = -ID:/Progetti/stl2glb/include -ID:/Progetti/stl2glb/external/tinygltf -isystem D:/Progetti/vcpkg/installed/x64-windows/include
   OBJECT_DIR = CMakeFiles\stl2glb.dir
   OBJECT_FILE_DIR = CMakeFiles\stl2glb.dir\src
 
 build CMakeFiles/stl2glb.dir/src/SimpleMinioClient.cpp.obj: CXX_COMPILER__stl2glb_unscanned_Debug D$:/Progetti/stl2glb/src/SimpleMinioClient.cpp || cmake_object_order_depends_target_stl2glb
-  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
+  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DNDEBUG -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
   DEP_FILE = CMakeFiles\stl2glb.dir\src\SimpleMinioClient.cpp.obj.d
-  FLAGS = -Wall -Wextra -Wpedantic -g -std=gnu++17 -fdiagnostics-color=always
+  FLAGS = -Wall -Wextra -g -std=gnu++17 -fdiagnostics-color=always
   INCLUDES = -ID:/Progetti/stl2glb/include -ID:/Progetti/stl2glb/external/tinygltf -isystem D:/Progetti/vcpkg/installed/x64-windows/include
   OBJECT_DIR = CMakeFiles\stl2glb.dir
   OBJECT_FILE_DIR = CMakeFiles\stl2glb.dir\src
 
 build CMakeFiles/stl2glb.dir/external/tinygltf/tiny_gltf.cc.obj: CXX_COMPILER__stl2glb_unscanned_Debug D$:/Progetti/stl2glb/external/tinygltf/tiny_gltf.cc || cmake_object_order_depends_target_stl2glb
-  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
+  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DNDEBUG -DTINYGLTF_NO_EXTERNAL_IMAGE -DTINYGLTF_NO_STB_IMAGE -DTINYGLTF_NO_STB_IMAGE_WRITE -DTINYGLTF_USE_CPP14 -DUSE_DRACO
   DEP_FILE = CMakeFiles\stl2glb.dir\external\tinygltf\tiny_gltf.cc.obj.d
-  FLAGS = -Wall -Wextra -Wpedantic -g -std=gnu++17 -fdiagnostics-color=always
+  FLAGS = -Wall -Wextra -g -std=gnu++17 -fdiagnostics-color=always
   INCLUDES = -ID:/Progetti/stl2glb/include -ID:/Progetti/stl2glb/external/tinygltf -isystem D:/Progetti/vcpkg/installed/x64-windows/include
   OBJECT_DIR = CMakeFiles\stl2glb.dir
   OBJECT_FILE_DIR = CMakeFiles\stl2glb.dir\external\tinygltf
@@ -138,7 +138,7 @@ build CMakeFiles/stl2glb.dir/external/tinygltf/tiny_gltf.cc.obj: CXX_COMPILER__s
 # Link the static library libstl2glb.a
 
 build libstl2glb.a: CXX_STATIC_LIBRARY_LINKER__stl2glb_Debug CMakeFiles/stl2glb.dir/src/Converter.cpp.obj CMakeFiles/stl2glb.dir/src/EnvironmentHandler.cpp.obj CMakeFiles/stl2glb.dir/src/GLBWriter.cpp.obj CMakeFiles/stl2glb.dir/src/Hasher.cpp.obj CMakeFiles/stl2glb.dir/src/Logger.cpp.obj CMakeFiles/stl2glb.dir/src/STLParser.cpp.obj CMakeFiles/stl2glb.dir/src/Server.cpp.obj CMakeFiles/stl2glb.dir/src/main.cpp.obj CMakeFiles/stl2glb.dir/src/SimpleMinioClient.cpp.obj CMakeFiles/stl2glb.dir/external/tinygltf/tiny_gltf.cc.obj
-  LANGUAGE_COMPILE_FLAGS = -Wall -Wextra -Wpedantic -g
+  LANGUAGE_COMPILE_FLAGS = -Wall -Wextra -g
   OBJECT_DIR = CMakeFiles\stl2glb.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
@@ -155,9 +155,9 @@ build libstl2glb.a: CXX_STATIC_LIBRARY_LINKER__stl2glb_Debug CMakeFiles/stl2glb.
 build cmake_object_order_depends_target_stl2glb_exec: phony || cmake_object_order_depends_target_stl2glb
 
 build CMakeFiles/stl2glb_exec.dir/src/main.cpp.obj: CXX_COMPILER__stl2glb_exec_unscanned_Debug D$:/Progetti/stl2glb/src/main.cpp || cmake_object_order_depends_target_stl2glb_exec
-  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DUSE_DRACO
+  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT
   DEP_FILE = CMakeFiles\stl2glb_exec.dir\src\main.cpp.obj.d
-  FLAGS = -Wall -Wextra -Wpedantic -g -std=gnu++17 -fdiagnostics-color=always
+  FLAGS = -Wall -Wextra -g -std=gnu++17 -fdiagnostics-color=always
   INCLUDES = -ID:/Progetti/stl2glb/include -ID:/Progetti/stl2glb/external/tinygltf -isystem D:/Progetti/vcpkg/installed/x64-windows/include
   OBJECT_DIR = CMakeFiles\stl2glb_exec.dir
   OBJECT_FILE_DIR = CMakeFiles\stl2glb_exec.dir\src
@@ -170,21 +170,15 @@ build CMakeFiles/stl2glb_exec.dir/src/main.cpp.obj: CXX_COMPILER__stl2glb_exec_u
 #############################################
 # Link the executable stl2glb_exec.exe
 
-build stl2glb_exec.exe: CXX_EXECUTABLE_LINKER__stl2glb_exec_Debug CMakeFiles/stl2glb_exec.dir/src/main.cpp.obj | libstl2glb.a D$:/Progetti/vcpkg/installed/x64-windows/debug/lib/libssl.lib D$:/Progetti/vcpkg/installed/x64-windows/debug/lib/libcrypto.lib D$:/Progetti/vcpkg/installed/x64-windows/debug/lib/brotlienc.lib D$:/Progetti/vcpkg/installed/x64-windows/debug/lib/brotlidec.lib D$:/Progetti/vcpkg/installed/x64-windows/debug/lib/brotlicommon.lib D$:/Progetti/vcpkg/installed/x64-windows/debug/lib/draco.lib || libstl2glb.a
-  FLAGS = -Wall -Wextra -Wpedantic -g
-  LINK_LIBRARIES = libstl2glb.a  D:/Progetti/vcpkg/installed/x64-windows/debug/lib/libssl.lib  D:/Progetti/vcpkg/installed/x64-windows/debug/lib/libcrypto.lib  D:/Progetti/vcpkg/installed/x64-windows/debug/lib/brotlienc.lib  D:/Progetti/vcpkg/installed/x64-windows/debug/lib/brotlidec.lib  D:/Progetti/vcpkg/installed/x64-windows/debug/lib/brotlicommon.lib  D:/Progetti/vcpkg/installed/x64-windows/debug/lib/draco.lib  -lws2_32  -lcrypt32  -lbcrypt  -lwinhttp  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+build stl2glb_exec.exe: CXX_EXECUTABLE_LINKER__stl2glb_exec_Debug CMakeFiles/stl2glb_exec.dir/src/main.cpp.obj | libstl2glb.a D$:/Progetti/vcpkg/installed/x64-windows/lib/brotlienc.lib D$:/Progetti/vcpkg/installed/x64-windows/lib/brotlidec.lib D$:/Progetti/vcpkg/installed/x64-windows/lib/brotlicommon.lib OpenSSL$:$:SSL-NOTFOUND OpenSSL$:$:Crypto-NOTFOUND D$:/Progetti/vcpkg/installed/x64-windows/lib/draco.lib || libstl2glb.a
+  FLAGS = -Wall -Wextra -g
+  LINK_LIBRARIES = libstl2glb.a  -lpthread  -ldl  -lws2_32  -lcrypt32  D:/Progetti/vcpkg/installed/x64-windows/lib/brotlienc.lib  D:/Progetti/vcpkg/installed/x64-windows/lib/brotlidec.lib  D:/Progetti/vcpkg/installed/x64-windows/lib/brotlicommon.lib  OpenSSL::SSL-NOTFOUND  OpenSSL::Crypto-NOTFOUND  D:/Progetti/vcpkg/installed/x64-windows/lib/draco.lib  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\stl2glb_exec.dir
-  POST_BUILD = C:\WINDOWS\system32\cmd.exe /C "cd /D D:\Progetti\stl2glb\cmake-build-debug && C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -noprofile -executionpolicy Bypass -file D:/Progetti/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary D:/Progetti/stl2glb/cmake-build-debug/stl2glb_exec.exe -installedDir D:/Progetti/vcpkg/installed/x64-windows/debug/bin -OutVariable out"
+  POST_BUILD = C:\WINDOWS\system32\cmd.exe /C "cd /D D:\Progetti\stl2glb\cmake-build-debug && C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -noprofile -executionpolicy Bypass -file D:/Progetti/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary D:/Progetti/stl2glb/cmake-build-debug/stl2glb_exec.exe -installedDir D:/Progetti/vcpkg/installed/x64-windows/debug/bin -OutVariable out && cd /D D:\Progetti\stl2glb\cmake-build-debug && "E:\Jetbrains\CLion 2025.1\bin\mingw\bin\strip.exe" D:/Progetti/stl2glb/cmake-build-debug/stl2glb_exec.exe"
   PRE_LINK = cd .
   TARGET_FILE = stl2glb_exec.exe
   TARGET_IMPLIB = libstl2glb_exec.dll.a
   TARGET_PDB = stl2glb_exec.exe.dbg
-
-
-#############################################
-# Utility command for test-build
-
-build test-build: phony CMakeFiles/test-build stl2glb_exec.exe
 
 
 #############################################
@@ -208,56 +202,6 @@ build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
   restat = 1
 
 build rebuild_cache: phony CMakeFiles/rebuild_cache.util
-
-
-#############################################
-# Utility command for list_install_components
-
-build list_install_components: phony
-
-
-#############################################
-# Utility command for install
-
-build CMakeFiles/install.util: CUSTOM_COMMAND all
-  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D D:\Progetti\stl2glb\cmake-build-debug && "E:\Jetbrains\CLion 2025.1\bin\cmake\win\x64\bin\cmake.exe" -P cmake_install.cmake"
-  DESC = Install the project...
-  pool = console
-  restat = 1
-
-build install: phony CMakeFiles/install.util
-
-
-#############################################
-# Utility command for install/local
-
-build CMakeFiles/install/local.util: CUSTOM_COMMAND all
-  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D D:\Progetti\stl2glb\cmake-build-debug && "E:\Jetbrains\CLion 2025.1\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake"
-  DESC = Installing only the local directory...
-  pool = console
-  restat = 1
-
-build install/local: phony CMakeFiles/install/local.util
-
-
-#############################################
-# Utility command for install/strip
-
-build CMakeFiles/install/strip.util: CUSTOM_COMMAND all
-  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D D:\Progetti\stl2glb\cmake-build-debug && "E:\Jetbrains\CLion 2025.1\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake"
-  DESC = Installing the project stripped...
-  pool = console
-  restat = 1
-
-build install/strip: phony CMakeFiles/install/strip.util
-
-
-#############################################
-# Custom command for CMakeFiles\test-build
-
-build CMakeFiles/test-build | ${cmake_ninja_workdir}CMakeFiles/test-build: CUSTOM_COMMAND stl2glb_exec.exe || libstl2glb.a stl2glb_exec.exe
-  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D D:\Progetti\stl2glb\cmake-build-debug && "E:\Jetbrains\CLion 2025.1\bin\cmake\win\x64\bin\cmake.exe" -E echo "Testing build..." && D:\Progetti\stl2glb\cmake-build-debug\stl2glb_exec.exe --version"
-  DESC = Testing executable
 
 # =============================================================================
 # Target aliases.

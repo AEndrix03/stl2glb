@@ -1,16 +1,59 @@
 "E:\Jetbrains\CLion 2025.1\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=E:/Jetbrains/CLion 2025.1/bin/ninja/win/x64/ninja.exe" -DCMAKE_TOOLCHAIN_FILE=D:/Progetti/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -G Ninja -S D:\Progetti\stl2glb -B D:\Progetti\stl2glb\cmake-build-debug
--- Draco compression library found
+-- Looking for C++ include cmath
+-- Looking for C++ include cmath - found
+-- ✅ nlohmann-json found
+-- ✅ httplib found
+-- ✅ OpenSSL found (targets)
+-- ✅ Draco found
 -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
--- Build Configuration:
---   System: Windows
---   Compiler: GNU
+-- Build Summary:
 --   Build type: Debug
---   CXX Flags:  -Wall -Wextra -Wpedantic 
---   Static libs: OFF
---   LTO: ON
---   Native arch: ON
+--   OpenSSL: TRUE
+--   nlohmann-json: 1
+--   httplib: 1
 --   Draco: 1
+--   C++ Standard: 17
 -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
--- Configuring done (0.5s)
+-- Configuring done (1.3s)
+CMake Warning (dev) in CMakeLists.txt:
+  Policy CMP0111 is not set: An imported target missing its location property
+  fails during generation.  Run "cmake --help-policy CMP0111" for policy
+  details.  Use the cmake_policy command to set the policy and suppress this
+  warning.
+
+  IMPORTED_LOCATION not set for imported target "OpenSSL::SSL" configuration
+  "Debug".
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning (dev) in CMakeLists.txt:
+  Policy CMP0111 is not set: An imported target missing its location property
+  fails during generation.  Run "cmake --help-policy CMP0111" for policy
+  details.  Use the cmake_policy command to set the policy and suppress this
+  warning.
+
+  IMPORTED_LOCATION not set for imported target "OpenSSL::Crypto"
+  configuration "Debug".
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning (dev) in CMakeLists.txt:
+  Policy CMP0111 is not set: An imported target missing its location property
+  fails during generation.  Run "cmake --help-policy CMP0111" for policy
+  details.  Use the cmake_policy command to set the policy and suppress this
+  warning.
+
+  IMPORTED_LOCATION not set for imported target "OpenSSL::SSL" configuration
+  "Debug".
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning (dev) in CMakeLists.txt:
+  Policy CMP0111 is not set: An imported target missing its location property
+  fails during generation.  Run "cmake --help-policy CMP0111" for policy
+  details.  Use the cmake_policy command to set the policy and suppress this
+  warning.
+
+  IMPORTED_LOCATION not set for imported target "OpenSSL::Crypto"
+  configuration "Debug".
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
 -- Generating done (0.1s)
 -- Build files have been written to: D:/Progetti/stl2glb/cmake-build-debug
