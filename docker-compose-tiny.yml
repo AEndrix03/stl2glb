@@ -47,7 +47,9 @@ services:
         sed -i '/#include <atomic>/a #include <cmath>' src/STLParser.cpp;
       fi &&
       echo '🏗️  Build con vcpkg...' &&
-      cmake -B build -S . -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux -DVCPKG_INSTALLED_DIR=/vcpkg/installed -GNinja -DCMAKE_PREFIX_PATH=/vcpkg/installed/x64-linux &&
+      echo '🔍 Debug vcpkg paths:' &&
+      echo 'VCPKG_INSTALLED_DIR:' && ls -la /vcpkg/installed/x64-linux/lib/ | head -5 &&
+      cmake -B build -S . -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux -DVCPKG_INSTALLED_DIR=/vcpkg/installed -GNinja -DCMAKE_PREFIX_PATH=/vcpkg/installed/x64-linux -DVCPKG_APPLOCAL_DEPS=OFF &&
       cmake --build build --config MinSizeRel --parallel \$(nproc) &&
       strip build/stl2glb_exec &&
       echo '✅ Build completato'
