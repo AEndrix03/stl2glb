@@ -1,1 +1,0 @@
-DOCKER_BUILDKIT=1 docker-compose -f docker-compose-tiny.yml up --build

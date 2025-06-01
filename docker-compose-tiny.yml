@@ -40,6 +40,12 @@ services:
         ls -la /vcpkg/installed/ 2>/dev/null || echo 'Directory installed non trovata';
         exit 1;
       fi &&
+      echo '🔍 Controllo librerie debug problematiche...' &&
+      if [ -d '/vcpkg/installed/x64-linux/debug' ]; then
+        echo '⚠️  Librerie debug trovate - potrebbero causare problemi';
+        echo '📋 Contenuto debug:';
+        ls -la /vcpkg/installed/x64-linux/debug/lib/ | head -3 || true;
+      fi &&
       echo '✅ vcpkg verificato' &&
       echo '🔨 Fix per Linux se necessario...' &&
       if [ -f 'src/STLParser.cpp' ]; then
@@ -49,7 +55,12 @@ services:
       echo '🏗️  Build con vcpkg...' &&
       echo '🔍 Debug vcpkg paths:' &&
       echo 'VCPKG_INSTALLED_DIR:' && ls -la /vcpkg/installed/x64-linux/lib/ | head -5 &&
-      cmake -B build -S . -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux -DVCPKG_INSTALLED_DIR=/vcpkg/installed -GNinja -DCMAKE_PREFIX_PATH=/vcpkg/installed/x64-linux -DVCPKG_APPLOCAL_DEPS=OFF &&
+      echo '🧹 Pulizia cache CMake...' &&
+      rm -rf build/ &&
+      echo '🔧 Impostazione variabili vcpkg...' &&
+      export VCPKG_ROOT=/vcpkg &&
+      export VCPKG_DEFAULT_TRIPLET=x64-linux &&
+      cmake -B build -S . -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux -DVCPKG_INSTALLED_DIR=/vcpkg/installed -DVCPKG_MANIFEST_MODE=OFF -DVCPKG_APPLOCAL_DEPS=OFF -GNinja &&
       cmake --build build --config MinSizeRel --parallel \$(nproc) &&
       strip build/stl2glb_exec &&
       echo '✅ Build completato'
