@@ -36,12 +36,20 @@ services:
         sed -i '/#include <atomic>/a #include <cmath>' src/STLParser.cpp
       fi
       
+      echo '🔍 Checking VCPKG installation...'
+      ls -la /vcpkg/
+      ls -la /vcpkg/installed/
+      echo 'Available triplets:'
+      ls /vcpkg/installed/ | grep x64
+      
       echo '🏗️ Building with VCPKG...'
+      export VCPKG_ROOT=/vcpkg
       cmake -B build -S . \
         -DCMAKE_BUILD_TYPE=MinSizeRel \
         -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake \
         -DVCPKG_TARGET_TRIPLET=x64-linux \
         -DVCPKG_INSTALLED_DIR=/vcpkg/installed \
+        -DVCPKG_MANIFEST_MODE=OFF \
         -GNinja
       
       cmake --build build --config MinSizeRel --parallel
