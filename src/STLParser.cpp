@@ -4,17 +4,17 @@
 #include <stdexcept>
 #include <cstdint>
 #include <algorithm>
+#include <cmath>
 #include <cctype>
 #include <cstring>
 #include <thread>
 #include <vector>
 #include <atomic>
-#include <cmath>
+
 
 // Platform-specific includes per memory mapping
 #ifdef _WIN32
 #include <windows.h>
-
 
 #else
 #include <sys/mman.h>

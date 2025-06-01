@@ -1,3 +1,78 @@
+# .dockerignore - Ottimizzato per build veloci
+
+# Build artifacts
 build/
-*.o
+cmake-build-*/
+.cmake/
+CMakeCache.txt
+CMakeFiles/
+*.cmake
+Makefile
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+LICENSE
+docs/
+*.md
+
+# Docker files (non copiare nel context)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Scripts (non necessari nel container)
+*.sh
+scripts/
+
+# Test files
+test/
+tests/
+*.test
+
+# Temporary
+tmp/
+temp/
+*.tmp
 *.log
+
+# Package managers (usiamo vcpkg esterno)
+vcpkg/
+vcpkg_installed/
+conan/
+.conan/
+
+# Binary outputs
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+stl2glb_exec
+
+# Object files
+*.o
+*.obj
+
+# Backup files
+*.bak
+*.backup
+*backup/
+
+# Environment
+.env.example
+.env.local
+.env.*.local

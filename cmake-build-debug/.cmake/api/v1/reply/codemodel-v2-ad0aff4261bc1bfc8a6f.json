@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-a4612114df6d3309f652.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "stl2glb",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "stl2glb::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-stl2glb-Debug-3f2702736df86656e589.json",
+					"name" : "stl2glb",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "stl2glb_exec::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-stl2glb_exec-Debug-39b18351e0ea71697a9d.json",
+					"name" : "stl2glb_exec",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "test-build::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-test-build-Debug-9fac15ec20013a7fd3b5.json",
+					"name" : "test-build",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "D:/Progetti/stl2glb/cmake-build-debug",
+		"source" : "D:/Progetti/stl2glb"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

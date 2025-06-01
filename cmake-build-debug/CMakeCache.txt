@@ -261,6 +261,15 @@ OpenSSL_DIR:PATH=D:/Progetti/vcpkg/installed/x64-windows/share/openssl
 //Path to a library.
 SSL_EAY:FILEPATH=D:/Progetti/vcpkg/installed/x64-windows/debug/lib/libssl.lib
 
+//Enable Link Time Optimization
+USE_LTO:BOOL=ON
+
+//Optimize for native architecture
+USE_NATIVE_ARCH:BOOL=ON
+
+//Build with static libraries
+USE_STATIC_LIBS:BOOL=OFF
+
 //Automatically copy dependencies into the output directory for
 // executables.
 VCPKG_APPLOCAL_DEPS:BOOL=ON
@@ -320,7 +329,7 @@ Z_VCPKG_PWSH_PATH:FILEPATH=Z_VCPKG_PWSH_PATH-NOTFOUND
 _VCPKG_INSTALLED_DIR:PATH=D:/Progetti/vcpkg/installed
 
 //The directory containing a CMake configuration file for draco.
-draco_DIR:PATH=draco_DIR-NOTFOUND
+draco_DIR:PATH=D:/Progetti/vcpkg/installed/x64-windows/share/draco
 
 //The directory containing a CMake configuration file for httplib.
 httplib_DIR:PATH=D:/Progetti/vcpkg/installed/x64-windows/share/httplib
