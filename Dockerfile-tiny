@@ -1,27 +1,40 @@
 # Dockerfile-tiny-fast - Build veloce usando vcpkg pre-installato dall'host
-# Richiede: vcpkg installato nel sistema host in /opt/vcpkg
+# syntax=docker/dockerfile:1.4
 
 FROM alpine:3.19 AS builder
 
-# Installa solo build tools (no vcpkg)
+# Argomenti per vcpkg
+ARG VCPKG_ROOT=/opt/vcpkg
+
+# Installa build tools
 RUN apk add --no-cache \
     build-base \
     cmake \
     ninja \
-    linux-headers
+    linux-headers \
+    git \
+    bash \
+    curl \
+    zip \
+    unzip \
+    tar \
+    pkg-config
+
+# Installa vcpkg se non è disponibile come mount
+RUN --mount=type=bind,source=/opt/vcpkg,target=/host-vcpkg,ro \
+    if [ -d "/host-vcpkg" ] && [ -f "/host-vcpkg/vcpkg" ]; then \
+        echo "Usando vcpkg dall'host..."; \
+        cp -r /host-vcpkg /vcpkg; \
+    else \
+        echo "Installando vcpkg da zero..."; \
+        git clone --depth 1 https://github.com/Microsoft/vcpkg.git /vcpkg && \
+        /vcpkg/bootstrap-vcpkg.sh && \
+        /vcpkg/vcpkg install --triplet=x64-linux --clean-after-build \
+        nlohmann-json httplib openssl; \
+    fi
 
 # Working directory
 WORKDIR /build
-
-# Copia vcpkg dall'host (deve essere montato come volume)
-# Questo richiede un mount bind durante il build
-# docker build --build-arg VCPKG_ROOT=/opt/vcpkg -v /opt/vcpkg:/vcpkg:ro .
-
-# Verifica che vcpkg sia disponibile
-RUN if [ ! -d "/vcpkg" ]; then \
-    echo "ERRORE: vcpkg non trovato. Monta /opt/vcpkg come volume durante il build"; \
-    exit 1; \
-    fi
 
 # Copia sorgenti
 COPY . .
@@ -45,12 +58,13 @@ RUN cmake -B build -S . \
 # Stage 2: Runtime minimale
 FROM alpine:3.19
 
-# Installa solo librerie runtime essenziali
+# Installa librerie runtime e wget per health check
 RUN apk add --no-cache \
     libstdc++ \
     libgcc \
     openssl \
-    ca-certificates && \
+    ca-certificates \
+    wget && \
     adduser -D -u 1000 appuser
 
 WORKDIR /app

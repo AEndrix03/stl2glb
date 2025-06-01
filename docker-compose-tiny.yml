@@ -1,4 +1,4 @@
-# Docker Compose ottimizzato per VPS con risorse molto limitate
+# Docker Compose ottimizzato per VPS con vcpkg dall'host
 
 services:
   # App ultra-minimale per VPS
@@ -6,7 +6,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-tiny
+      args:
+        - VCPKG_ROOT=/opt/vcpkg
+      # Per montare vcpkg durante il build, usa il target specifico
+      target: builder
 
+    # Immagine finale ottimizzata
     image: stl2glb:tiny
     container_name: stl2glb_tiny
 
@@ -49,7 +54,7 @@ services:
           cpus: '0.1'
           memory: 64M
 
-    # Health check corretto - rimuovi --health se non supportato
+    # Health check corretto
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
       interval: 60s
