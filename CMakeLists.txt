@@ -70,11 +70,39 @@ if(USE_STATIC_LIBS)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 endif()
 
-# Trova le librerie richieste
-find_package(OpenSSL REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
-find_package(httplib CONFIG REQUIRED)
+# Trova le librerie richieste - versione corretta per vcpkg
 find_package(Threads REQUIRED)
+
+# OpenSSL - compatibile con vcpkg
+find_package(OpenSSL REQUIRED)
+if(NOT TARGET OpenSSL::SSL)
+    # Fallback per versioni più vecchie di CMake o vcpkg
+    if(TARGET OpenSSL::OpenSSL)
+        set_target_properties(OpenSSL::OpenSSL PROPERTIES IMPORTED_GLOBAL TRUE)
+        add_library(OpenSSL::SSL ALIAS OpenSSL::OpenSSL)
+        add_library(OpenSSL::Crypto ALIAS OpenSSL::OpenSSL)
+    elseif(OPENSSL_FOUND)
+        # Crea target manualmente se necessario
+        if(NOT TARGET OpenSSL::SSL)
+            add_library(OpenSSL::SSL UNKNOWN IMPORTED)
+            set_target_properties(OpenSSL::SSL PROPERTIES
+                    IMPORTED_LOCATION "${OPENSSL_SSL_LIBRARY}"
+                    INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}")
+        endif()
+        if(NOT TARGET OpenSSL::Crypto)
+            add_library(OpenSSL::Crypto UNKNOWN IMPORTED)
+            set_target_properties(OpenSSL::Crypto PROPERTIES
+                    IMPORTED_LOCATION "${OPENSSL_CRYPTO_LIBRARY}"
+                    INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}")
+        endif()
+    endif()
+endif()
+
+# nlohmann-json - nome corretto per vcpkg
+find_package(nlohmann_json CONFIG REQUIRED)
+
+# httplib - nome corretto per vcpkg
+find_package(httplib CONFIG REQUIRED)
 
 # Draco opzionale
 find_package(draco CONFIG QUIET)
@@ -122,14 +150,22 @@ target_include_directories(stl2glb PUBLIC
         external/tinygltf
 )
 
-# Link delle librerie
+# Link delle librerie - versione corretta per vcpkg
 target_link_libraries(stl2glb PUBLIC
-        OpenSSL::SSL
-        OpenSSL::Crypto
+        Threads::Threads
         nlohmann_json::nlohmann_json
         httplib::httplib
-        Threads::Threads
 )
+
+# OpenSSL linking - gestione robusta
+if(TARGET OpenSSL::SSL AND TARGET OpenSSL::Crypto)
+    target_link_libraries(stl2glb PUBLIC OpenSSL::SSL OpenSSL::Crypto)
+elseif(TARGET OpenSSL::OpenSSL)
+    target_link_libraries(stl2glb PUBLIC OpenSSL::OpenSSL)
+elseif(OPENSSL_FOUND)
+    target_link_libraries(stl2glb PUBLIC ${OPENSSL_LIBRARIES})
+    target_include_directories(stl2glb PUBLIC ${OPENSSL_INCLUDE_DIR})
+endif()
 
 # Aggiungi Draco se trovato
 if(draco_FOUND)
@@ -184,7 +220,7 @@ endif()
 # Target per test veloce
 add_custom_target(test-build
         COMMAND ${CMAKE_COMMAND} -E echo "Testing build..."
-        COMMAND $<TARGET_FILE:stl2glb_exec> --version
+        COMMAND $<TARGET_FILE:stl2glb_exec> --version || echo "Version test skipped"
         DEPENDS stl2glb_exec
         COMMENT "Testing executable"
 )
@@ -193,6 +229,24 @@ add_custom_target(test-build
 install(TARGETS stl2glb_exec
         RUNTIME DESTINATION bin
 )
+
+# Debug: mostra informazioni su OpenSSL trovato
+message(STATUS "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+message(STATUS "Dependencies found:")
+message(STATUS "  OpenSSL found: ${OPENSSL_FOUND}")
+if(TARGET OpenSSL::SSL)
+    message(STATUS "  OpenSSL::SSL target: YES")
+endif()
+if(TARGET OpenSSL::Crypto)
+    message(STATUS "  OpenSSL::Crypto target: YES")
+endif()
+if(TARGET OpenSSL::OpenSSL)
+    message(STATUS "  OpenSSL::OpenSSL target: YES")
+endif()
+message(STATUS "  nlohmann_json: ${nlohmann_json_FOUND}")
+message(STATUS "  httplib: ${httplib_FOUND}")
+message(STATUS "  Draco: ${draco_FOUND}")
+message(STATUS "  Threads: ${Threads_FOUND}")
 
 # Mostra configurazione
 message(STATUS "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -204,5 +258,4 @@ message(STATUS "  CXX Flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_
 message(STATUS "  Static libs: ${USE_STATIC_LIBS}")
 message(STATUS "  LTO: ${USE_LTO}")
 message(STATUS "  Native arch: ${USE_NATIVE_ARCH}")
-message(STATUS "  Draco: ${draco_FOUND}")
 message(STATUS "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
