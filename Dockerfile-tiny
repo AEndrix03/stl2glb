@@ -1,9 +1,14 @@
-# Dockerfile-tiny - Copia vcpkg dall'host prima del build
-# PREREQUISITO: vcpkg deve essere presente in ./vcpkg/ nella directory di build
+# Dockerfile-tiny - Usa vcpkg da volume mount
+# Il mount viene gestito da docker-compose
+
+FROM alpine:3.19 AS vcpkg-prep
+
+# Copia vcpkg dall'host tramite volume mount
+RUN mkdir -p /vcpkg-temp
 
 FROM alpine:3.19 AS builder
 
-# Installa solo build tools essenziali
+# Installa build tools
 RUN apk add --no-cache \
     build-base \
     cmake \
@@ -13,29 +18,33 @@ RUN apk add --no-cache \
 # Working directory
 WORKDIR /build
 
-# Copia vcpkg dal context (preparato dallo script)
-COPY vcpkg/ /vcpkg/
+# Copia tutto il progetto (escluso vcpkg per ora)
+COPY . .
 
-# Verifica che vcpkg sia presente e funzionante
+# Verifica se vcpkg è già presente nel context
+RUN if [ -d "vcpkg" ]; then \
+        echo "✅ vcpkg trovato nel build context"; \
+        cp -r vcpkg /vcpkg; \
+    else \
+        echo "❌ vcpkg non trovato nel build context"; \
+        echo "🔧 Questo build richiede vcpkg preparato"; \
+        exit 1; \
+    fi
+
+# Verifica vcpkg
 RUN if [ ! -f "/vcpkg/vcpkg" ]; then \
-        echo "❌ ERRORE: vcpkg non trovato"; \
-        echo "🔧 Esegui il build tramite: ./build-and-run.sh"; \
+        echo "❌ vcpkg non eseguibile"; \
         exit 1; \
     fi && \
     if [ ! -d "/vcpkg/installed/x64-linux" ]; then \
-        echo "❌ ERRORE: dipendenze vcpkg non installate per x64-linux"; \
-        echo "🔧 Verifica l'installazione delle dipendenze"; \
-        ls -la /vcpkg/installed/ || echo "Directory installed non trovata"; \
+        echo "❌ dipendenze vcpkg x64-linux non trovate"; \
+        echo "📦 Contenuto vcpkg/installed:"; \
+        ls -la /vcpkg/installed/ 2>/dev/null || echo "Directory installed non trovata"; \
         exit 1; \
     fi && \
-    echo "✅ vcpkg verificato correttamente" && \
+    echo "✅ vcpkg verificato" && \
     echo "📦 Dipendenze disponibili:" && \
-    ls -la /vcpkg/installed/x64-linux/
-
-# Copia sorgenti del progetto
-COPY src/ ./src/
-COPY CMakeLists.txt ./
-COPY *.cpp *.h ./ 2>/dev/null || true
+    ls -la /vcpkg/installed/x64-linux/lib/ 2>/dev/null || echo "Lib directory non trovata"
 
 # Fix per Linux se necessario
 RUN if [ -f "src/STLParser.cpp" ]; then \

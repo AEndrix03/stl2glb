@@ -1,5 +1,5 @@
-# Docker Compose per stl2glb - RICHIEDE setup vcpkg
-# PREREQUISITO: Eseguire prima ./setup-vcpkg.sh
+# Docker Compose per stl2glb
+# PREREQUISITO: Eseguire prima ./prepare-build.sh
 
 services:
   app:
