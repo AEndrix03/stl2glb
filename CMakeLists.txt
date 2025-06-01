@@ -65,9 +65,30 @@ endif()
 
 # Trova le dipendenze richieste
 find_package(Threads REQUIRED)
+
+# OpenSSL con supporto per percorsi VCPKG personalizzati
+if(DEFINED ENV{OPENSSL_ROOT_DIR})
+    set(OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT_DIR})
+endif()
 find_package(OpenSSL REQUIRED)
+
+# Cerca le altre dipendenze con CONFIG mode per VCPKG
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(httplib CONFIG REQUIRED)
+
+# Se httplib non viene trovato con CONFIG, prova il metodo alternativo
+if(NOT TARGET httplib::httplib)
+    find_path(HTTPLIB_INCLUDE_DIR NAMES httplib.h)
+    if(HTTPLIB_INCLUDE_DIR)
+        add_library(httplib::httplib INTERFACE IMPORTED)
+        set_target_properties(httplib::httplib PROPERTIES
+                INTERFACE_INCLUDE_DIRECTORIES "${HTTPLIB_INCLUDE_DIR}"
+        )
+        message(STATUS "Found httplib at: ${HTTPLIB_INCLUDE_DIR}")
+    else()
+        message(FATAL_ERROR "Could not find httplib")
+    endif()
+endif()
 
 # Draco è opzionale
 find_package(draco CONFIG QUIET)
