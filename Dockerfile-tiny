@@ -1,11 +1,4 @@
-# Dockerfile-tiny - Usa vcpkg da volume mount
-# Il mount viene gestito da docker-compose
-
-FROM alpine:3.19 AS vcpkg-prep
-
-# Copia vcpkg dall'host tramite volume mount
-RUN mkdir -p /vcpkg-temp
-
+# Dockerfile che usa additional_contexts per vcpkg
 FROM alpine:3.19 AS builder
 
 # Installa build tools
@@ -18,33 +11,22 @@ RUN apk add --no-cache \
 # Working directory
 WORKDIR /build
 
-# Copia tutto il progetto (escluso vcpkg per ora)
-COPY . .
-
-# Verifica se vcpkg è già presente nel context
-RUN if [ -d "vcpkg" ]; then \
-        echo "✅ vcpkg trovato nel build context"; \
-        cp -r vcpkg /vcpkg; \
-    else \
-        echo "❌ vcpkg non trovato nel build context"; \
-        echo "🔧 Questo build richiede vcpkg preparato"; \
-        exit 1; \
-    fi
+# Copia vcpkg dall'additional context
+COPY --from=vcpkg . /vcpkg
 
 # Verifica vcpkg
 RUN if [ ! -f "/vcpkg/vcpkg" ]; then \
-        echo "❌ vcpkg non eseguibile"; \
+        echo "❌ vcpkg non trovato"; \
         exit 1; \
     fi && \
     if [ ! -d "/vcpkg/installed/x64-linux" ]; then \
-        echo "❌ dipendenze vcpkg x64-linux non trovate"; \
-        echo "📦 Contenuto vcpkg/installed:"; \
-        ls -la /vcpkg/installed/ 2>/dev/null || echo "Directory installed non trovata"; \
+        echo "❌ dipendenze vcpkg x64-linux non installate"; \
         exit 1; \
     fi && \
-    echo "✅ vcpkg verificato" && \
-    echo "📦 Dipendenze disponibili:" && \
-    ls -la /vcpkg/installed/x64-linux/lib/ 2>/dev/null || echo "Lib directory non trovata"
+    echo "✅ vcpkg verificato"
+
+# Copia sorgenti del progetto
+COPY . .
 
 # Fix per Linux se necessario
 RUN if [ -f "src/STLParser.cpp" ]; then \
