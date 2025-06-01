@@ -1,4 +1,6 @@
-# Dockerfile che usa additional_contexts per vcpkg
+# Dockerfile con bind mount di vcpkg
+# syntax=docker/dockerfile:1.4
+
 FROM alpine:3.19 AS builder
 
 # Installa build tools
@@ -11,19 +13,42 @@ RUN apk add --no-cache \
 # Working directory
 WORKDIR /build
 
-# Copia vcpkg dall'additional context
-COPY --from=vcpkg . /vcpkg
+# Dockerfile con bind mount di vcpkg
+# syntax=docker/dockerfile:1.4
+# IMPORTANTE: Richiede DOCKER_BUILDKIT=1
 
-# Verifica vcpkg
-RUN if [ ! -f "/vcpkg/vcpkg" ]; then \
-        echo "❌ vcpkg non trovato"; \
+FROM alpine:3.19 AS builder
+
+# Installa build tools
+RUN apk add --no-cache \
+    build-base \
+    cmake \
+    ninja \
+    linux-headers
+
+# Working directory
+WORKDIR /build
+
+# Usa bind mount per vcpkg dall'host
+RUN --mount=type=bind,source=/opt/vcpkg,target=/vcpkg,readonly \
+    echo "🔍 Verifica vcpkg mount..." && \
+    ls -la /vcpkg/ && \
+    if [ ! -f "/vcpkg/vcpkg" ]; then \
+        echo "❌ vcpkg eseguibile non trovato in /opt/vcpkg"; \
+        echo "🔧 Verifica che vcpkg sia installato correttamente"; \
         exit 1; \
     fi && \
     if [ ! -d "/vcpkg/installed/x64-linux" ]; then \
         echo "❌ dipendenze vcpkg x64-linux non installate"; \
+        echo "📦 Directory installed disponibili:"; \
+        ls -la /vcpkg/installed/ 2>/dev/null || echo "Directory installed non trovata"; \
+        echo "🔧 Esegui: cd /opt/vcpkg && ./vcpkg install --triplet=x64-linux nlohmann-json httplib openssl"; \
         exit 1; \
     fi && \
-    echo "✅ vcpkg verificato"
+    echo "✅ vcpkg verificato correttamente" && \
+    echo "📦 Copiando vcpkg nel container..." && \
+    cp -r /vcpkg /tmp/vcpkg && \
+    echo "✅ vcpkg copiato"
 
 # Copia sorgenti del progetto
 COPY . .
@@ -37,9 +62,9 @@ RUN if [ -f "src/STLParser.cpp" ]; then \
 # Build ottimizzata
 RUN cmake -B build -S . \
     -DCMAKE_BUILD_TYPE=MinSizeRel \
-    -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake \
+    -DCMAKE_TOOLCHAIN_FILE=/tmp/vcpkg/scripts/buildsystems/vcpkg.cmake \
     -DVCPKG_TARGET_TRIPLET=x64-linux \
-    -DVCPKG_INSTALLED_DIR=/vcpkg/installed \
+    -DVCPKG_INSTALLED_DIR=/tmp/vcpkg/installed \
     -GNinja && \
     cmake --build build --config MinSizeRel --parallel $(nproc) && \
     strip build/stl2glb_exec

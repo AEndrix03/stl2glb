@@ -6,9 +6,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-tiny
-      # Mount vcpkg durante il build (richiede Docker Compose 2.17+)
-      additional_contexts:
-        vcpkg: /opt/vcpkg
 
     image: stl2glb:tiny
     container_name: stl2glb_tiny
