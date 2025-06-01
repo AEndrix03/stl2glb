@@ -33,7 +33,6 @@ services:
       
       echo "📋 Copying source files..."
       cp -r /src/* /build/
-      cp -r /src/.* /build/ 2>/dev/null || true
       rm -rf /build/build /build/cmake-build-* /build/CMakeCache.txt
       
       echo "🔨 Fixing STLParser.cpp if needed..."
@@ -42,64 +41,25 @@ services:
         sed -i "/#include <atomic>/a #include <cmath>" src/STLParser.cpp
       fi
       
-      echo "🔍 Checking VCPKG installation..."
-      echo "VCPKG root contents:"
-      ls -la /vcpkg/
+      echo "🔍 Verifying VCPKG packages..."
+      echo "nlohmann-json files:"
+      ls -la /vcpkg/installed/x64-linux/share/nlohmann_json/
       echo ""
-      echo "VCPKG installed directory:"
-      ls -la /vcpkg/installed/
-      echo ""
-      echo "Looking for x64-linux directories:"
-      find /vcpkg/installed -maxdepth 1 -type d -name "*x64-linux*" | sort
-      
-      echo "🔍 Debug: Finding nlohmann-json in VCPKG..."
-      find /vcpkg/installed -name "*nlohmann*" -type f | head -10
-      find /vcpkg/installed -name "*json*config.cmake" | head -10
-      
-      # Trova il triplet corretto
-      TRIPLET=""
-      if [ -d "/vcpkg/installed/x64-linux" ]; then
-        TRIPLET="x64-linux"
-      elif [ -d "/vcpkg/installed/x64-linux-release" ]; then
-        TRIPLET="x64-linux-release"
-      elif [ -d "/vcpkg/installed/x64-linux-dynamic" ]; then
-        TRIPLET="x64-linux-dynamic"
-      fi
-      
-      if [ -z "$TRIPLET" ]; then
-        echo "ERROR: No x64-linux triplet found!"
-        echo "Available directories in /vcpkg/installed:"
-        ls -la /vcpkg/installed/
-        exit 1
-      fi
-      
-      echo "Using triplet: $TRIPLET"
-      
-      echo "🔍 Checking cmake configs in triplet..."
-      echo "CMake configs in /vcpkg/installed/$TRIPLET/share:"
-      ls -la /vcpkg/installed/$TRIPLET/share/ | head -20
+      echo "httplib files:"
+      ls -la /vcpkg/installed/x64-linux/share/cpp-httplib/ || ls -la /vcpkg/installed/x64-linux/include/ | grep httplib
       
       echo "🏗️ Building with VCPKG..."
       export VCPKG_ROOT=/vcpkg
-      export PKG_CONFIG_PATH=/vcpkg/installed/$TRIPLET/lib/pkgconfig:$PKG_CONFIG_PATH
-      export OPENSSL_ROOT_DIR=/vcpkg/installed/$TRIPLET
-      export CMAKE_PREFIX_PATH="/vcpkg/installed/$TRIPLET;/vcpkg/installed/$TRIPLET/share"
-      
-      echo "Environment variables set:"
-      echo "  TRIPLET=$TRIPLET"
-      echo "  OPENSSL_ROOT_DIR=$OPENSSL_ROOT_DIR"
-      echo "  CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
-      echo "  VCPKG_ROOT=$VCPKG_ROOT"
+      export VCPKG_TARGET_TRIPLET=x64-linux
       
       cmake -B build -S . \
         -DCMAKE_BUILD_TYPE=MinSizeRel \
         -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake \
-        -DVCPKG_TARGET_TRIPLET=$TRIPLET \
+        -DVCPKG_TARGET_TRIPLET=x64-linux \
         -DVCPKG_INSTALLED_DIR=/vcpkg/installed \
         -DVCPKG_MANIFEST_MODE=OFF \
-        -DCMAKE_PREFIX_PATH="/vcpkg/installed/$TRIPLET;/vcpkg/installed/$TRIPLET/share" \
-        -Dnlohmann_json_DIR=/vcpkg/installed/$TRIPLET/share/nlohmann_json \
-        -Dhttplib_DIR=/vcpkg/installed/$TRIPLET/share/cpp-httplib \
+        -DCMAKE_PREFIX_PATH="/vcpkg/installed/x64-linux;/vcpkg/installed/x64-linux/share" \
+        -Dnlohmann_json_DIR=/vcpkg/installed/x64-linux/share/nlohmann_json \
         -GNinja
       
       echo "🔨 Building project..."
@@ -110,7 +70,6 @@ services:
       
       echo "📦 Copying to output..."
       cp build/stl2glb /output/
-      echo "Output contents:"
       ls -la /output/
       
       echo "✅ Build completed!"
@@ -128,57 +87,25 @@ services:
         condition: service_completed_successfully
     volumes:
       - build_output:/app:ro
-
-    # Setup iniziale e run
+    entrypoint: ["/bin/sh", "-c"]
     command: |
-      sh -c "
-      echo '🔧 Installing runtime dependencies...'
-      apk add --no-cache \
-        libstdc++ \
-        libgcc \
-        openssl \
-        ca-certificates \
-        wget
-      
-      echo '👤 Creating app user...'
-      adduser -D -u 1000 -g 1000 appuser || true
-      
-      echo '📁 Checking executable...'
-      ls -la /app/
-      
-      if [ ! -f '/app/stl2glb' ]; then
-        echo '❌ Executable not found!'
-        exit 1
-      fi
-      
-      echo '🚀 Starting application...'
-      exec su appuser -c '/app/stl2glb'
-      "
+      "apk add --no-cache libstdc++ libgcc openssl ca-certificates wget && \
+       adduser -D -u 1000 -g 1000 appuser 2>/dev/null || true && \
+       exec su appuser -c '/app/stl2glb'"
 
-    # Porte
     ports:
       - "9002:8080"
-
-    # Environment da file .env
     env_file:
       - .env
-
-    # Variabili aggiuntive
     environment:
       - MALLOC_ARENA_MAX=1
       - GOMAXPROCS=1
-
-    # DNS
     dns:
       - 1.1.1.1
       - 8.8.8.8
-
-    # Host esterni
     extra_hosts:
       - "minio:217.160.248.228"
       - "minio.aredegalli.it:217.160.248.228"
-
-    # Risorse limitate
     deploy:
       resources:
         limits:
@@ -188,41 +115,26 @@ services:
         reservations:
           cpus: '0.1'
           memory: 128M
-
-    # Health check
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 20s
-
-    # Logging
     logging:
       driver: "json-file"
       options:
         max-size: "5m"
         max-file: "2"
         compress: "true"
-
-    # Security
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
     cap_add:
       - NET_BIND_SERVICE
-
-    # Tuning
-    sysctls:
-      - net.core.somaxconn=128
-      - net.ipv4.tcp_fin_timeout=30
-      - net.ipv4.tcp_keepalive_time=600
-
-    # Tmpfs
     tmpfs:
       - /tmp:size=50M,noexec,nosuid,nodev
-
     networks:
       - stl2glb-net
 
