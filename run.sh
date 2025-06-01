@@ -31,21 +31,7 @@ if [ ! -d "${VCPKG_HOST_PATH}" ] || [ ! -f "${VCPKG_HOST_PATH}/vcpkg" ]; then
     exit 1
 fi
 
-# 2. Verifica dipendenze
-echo "📦 Verifica dipendenze..."
-cd "${VCPKG_HOST_PATH}"
-REQUIRED_PACKAGES=("nlohmann-json" "httplib" "openssl")
-
-for package in "${REQUIRED_PACKAGES[@]}"; do
-    if ! ./vcpkg list | grep -q "^${package}:x64-linux"; then
-        echo "❌ Pacchetto mancante: ${package}"
-        echo "🔧 Esegui prima: ./setup-vcpkg.sh"
-        exit 1
-    fi
-done
-
 cd - > /dev/null
-echo "✅ Tutte le dipendenze sono disponibili"
 
 # 3. Prepara build context
 echo "📁 Preparazione build context..."
