@@ -62,14 +62,7 @@ services:
 
   # Stage 2: Runtime minimale
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile-tiny
-      # Mount vcpkg durante il build (richiede Docker Compose 2.17+)
-      additional_contexts:
-        vcpkg: /home/vcpkg
-
-    image: stl2glb:tiny
+    image: alpine:3.19
     container_name: stl2glb_tiny
     depends_on:
       builder:
