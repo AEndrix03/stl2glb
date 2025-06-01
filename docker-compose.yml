@@ -5,9 +5,9 @@ networks:
     driver: bridge
 
 services:
-  # Servizio di build che usa VCPKG dall'host
+  # Servizio di build che usa VCPKG dall'host - Ubuntu based
   builder:
-    image: alpine:3.19
+    image: ubuntu:22.04
     container_name: stl2glb_builder
     volumes:
       - ./:/src:ro
@@ -15,16 +15,17 @@ services:
       - build_output:/output
     working_dir: /src
     command: |
-      /bin/sh -c '
+      /bin/bash -c '
       set -e
       echo "🔧 Installing build dependencies..."
-      apk add --no-cache \
-        build-base \
+      apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
         cmake \
-        ninja \
-        linux-headers \
-        openssl-dev \
-        pkgconf
+        ninja-build \
+        libssl-dev \
+        pkg-config \
+        ca-certificates \
+        && rm -rf /var/lib/apt/lists/*
       
       echo "📁 Creating clean build directory..."
       rm -rf /build
@@ -41,13 +42,6 @@ services:
         sed -i "/#include <atomic>/a #include <cmath>" src/STLParser.cpp
       fi
       
-      echo "🔍 Verifying VCPKG packages..."
-      echo "nlohmann-json files:"
-      ls -la /vcpkg/installed/x64-linux/share/nlohmann_json/
-      echo ""
-      echo "httplib files:"
-      ls -la /vcpkg/installed/x64-linux/share/cpp-httplib/ || ls -la /vcpkg/installed/x64-linux/include/ | grep httplib
-      
       echo "🏗️ Building with VCPKG..."
       export VCPKG_ROOT=/vcpkg
       export VCPKG_TARGET_TRIPLET=x64-linux
@@ -59,7 +53,6 @@ services:
         -DVCPKG_INSTALLED_DIR=/vcpkg/installed \
         -DVCPKG_MANIFEST_MODE=OFF \
         -DCMAKE_PREFIX_PATH="/vcpkg/installed/x64-linux;/vcpkg/installed/x64-linux/share" \
-        -Dnlohmann_json_DIR=/vcpkg/installed/x64-linux/share/nlohmann_json \
         -GNinja
       
       echo "🔨 Building project..."
@@ -77,9 +70,9 @@ services:
     networks:
       - stl2glb-net
 
-  # Servizio app che usa l'eseguibile buildato
+  # Servizio app - Ubuntu based per compatibilità
   app:
-    image: alpine:3.19
+    image: ubuntu:22.04
     container_name: stl2glb_app
     restart: always
     depends_on:
@@ -87,12 +80,14 @@ services:
         condition: service_completed_successfully
     volumes:
       - build_output:/app:ro
-    entrypoint: ["/bin/sh", "-c"]
+    entrypoint: ["/bin/bash", "-c"]
     command: |
-      "apk add --no-cache libstdc++ libgcc openssl ca-certificates wget && \
-       adduser -D -u 1000 -g 1000 appuser 2>/dev/null || true && \
+      "apt-get update && apt-get install -y --no-install-recommends \
+         libssl3 ca-certificates wget && \
+       rm -rf /var/lib/apt/lists/* && \
+       useradd -m -u 1000 appuser 2>/dev/null || true && \
        exec su appuser -c '/app/stl2glb'"
-
+    
     ports:
       - "9002:8080"
     env_file:
