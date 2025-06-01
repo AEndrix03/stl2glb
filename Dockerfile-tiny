@@ -1,11 +1,7 @@
-# Dockerfile-tiny-fast - Build veloce usando vcpkg pre-installato sull'host
-# Richiede: VCPKG_HOST_DIR=/opt/vcpkg come build arg
+# Dockerfile-tiny-fast - Build veloce usando vcpkg pre-installato dall'host
+# Richiede: vcpkg installato nel sistema host in /opt/vcpkg
 
-# Stage 1: Builder con vcpkg copiato dall'host
 FROM alpine:3.19 AS builder
-
-# Argomento per il percorso vcpkg
-ARG VCPKG_HOST_DIR=/opt/vcpkg
 
 # Installa solo build tools (no vcpkg)
 RUN apk add --no-cache \
@@ -14,19 +10,27 @@ RUN apk add --no-cache \
     ninja \
     linux-headers
 
-# Copia vcpkg pre-installato dall'host
-# Questo avviene durante il build, non runtime
-COPY --from=host ${VCPKG_HOST_DIR} /vcpkg
-
 # Working directory
 WORKDIR /build
+
+# Copia vcpkg dall'host (deve essere montato come volume)
+# Questo richiede un mount bind durante il build
+# docker build --build-arg VCPKG_ROOT=/opt/vcpkg -v /opt/vcpkg:/vcpkg:ro .
+
+# Verifica che vcpkg sia disponibile
+RUN if [ ! -d "/vcpkg" ]; then \
+    echo "ERRORE: vcpkg non trovato. Monta /opt/vcpkg come volume durante il build"; \
+    exit 1; \
+    fi
 
 # Copia sorgenti
 COPY . .
 
-# Fix per Linux
-RUN grep -q "#include <cmath>" src/STLParser.cpp || \
-    sed -i '/#include <atomic>/a #include <cmath>' src/STLParser.cpp
+# Fix per Linux se necessario
+RUN if [ -f "src/STLParser.cpp" ]; then \
+    grep -q "#include <cmath>" src/STLParser.cpp || \
+    sed -i '/#include <atomic>/a #include <cmath>' src/STLParser.cpp; \
+    fi
 
 # Build ottimizzata
 RUN cmake -B build -S . \

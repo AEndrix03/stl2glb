@@ -1,5 +1,3 @@
-version: "3.9"
-
 # Docker Compose ottimizzato per VPS con risorse molto limitate
 
 services:
@@ -51,9 +49,9 @@ services:
           cpus: '0.1'
           memory: 64M
 
-    # Health check minimale
+    # Health check corretto - rimuovi --health se non supportato
     healthcheck:
-      test: ["CMD", "/stl2glb_exec", "--health"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
       interval: 60s
       timeout: 5s
       retries: 2
