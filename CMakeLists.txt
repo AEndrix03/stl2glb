@@ -10,6 +10,10 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE MinSizeRel)
 endif()
 
+# Forza solo librerie release per evitare problemi debug
+set(CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL Release)
+set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Release)
+
 # Flags ottimizzate per Alpine/container
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 set(CMAKE_CXX_FLAGS_MINSIZEREL "-Os -DNDEBUG -ffunction-sections -fdata-sections")
