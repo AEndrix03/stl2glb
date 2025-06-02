@@ -11,8 +11,6 @@ services:
     volumes:
       - ./:/src:ro
       - /home/vcpkg:/vcpkg:ro
-      # Notare che NON serve alcun build_output:/output come volume,
-      # perché il Dockerfile prende in carico tutto internamente.
     working_dir: /src
     command: >
       bash -c "

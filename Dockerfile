@@ -35,9 +35,9 @@ ARG VCPKG_TRIPLET=x64-linux
 # Nota: puoi modificare i flag di CMake come serve a te
 RUN cmake -G Ninja \
       -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_TOOLCHAIN_FILE="${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" \
-      -DVCPKG_TARGET_TRIPLET="${VCPKG_TRIPLET}" \
-      -DVCPKG_INSTALLED_DIR="${VCPKG_ROOT}/installed" \
+      -DCMAKE_TOOLCHAIN_FILE="/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+      -DVCPKG_TARGET_TRIPLET="x64-linux" \
+      -DVCPKG_INSTALLED_DIR="/vcpkg/installed" \
       -S /src \
       -B /build
 
