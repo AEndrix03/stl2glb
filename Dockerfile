@@ -6,8 +6,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl3 \
     ca-certificates \
     wget \
-    && rm -rf /var/lib/apt/lists/* \
-    && useradd -m -u 1000 -g 1000 appuser
+    && rm -rf /var/lib/apt/lists/*
+
+# Crea gruppo e utente
+RUN groupadd -g 1000 appgroup && \
+    useradd -m -u 1000 -g appgroup appuser
 
 # Crea directory app
 WORKDIR /app
