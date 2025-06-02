@@ -1,24 +1,26 @@
-version: "3.9"
-
 services:
 
   app:
+    # anziché "build: context: . / dockerfile: Dockerfile", specifichiamo il nuovo Dockerfile.runtime
     build:
-      context: .
-      dockerfile: Dockerfile    # il multi-stage di sopra
+      context: .                   # la cartella di progetto, che contiene il subfolder build/
+      dockerfile: Dockerfile.runtime
     image: stl2glb:runtime
     container_name: stl2glb_app
     restart: always
-    volumes:
-      - build.sh:build.sh
+
+    # Se il tuo binario richiede certe env var, dichiarale qui (oppure in .env)
     env_file:
       - .env
     environment:
-      - SOME_CONFIG_PATH=/etc/stl2glb/config.yaml
-      - ANOTHER_VAR=valore2
+    # ad esempio:
+    # - MY_API_KEY=abcdef
+    # - ANOTHER_VAR=xyz
+    # aggiungi tutte le variabili di cui il tuo stl2glb si lamenta se mancanti
+    # (leggi l’errore “Missing one or more required environment variables” e definisci qui)
 
     ports:
-      - "9002:8080"   # mappa porta 8080 del container sulla 9002 dell’host
+      - "9002:8080"   # se stl2glb serve su 8080, lo rendiamo accessibile sulla porta 9002 dell’host
 
     dns:
       - 1.1.1.1
@@ -30,6 +32,7 @@ services:
       - ALL
     cap_add:
       - NET_BIND_SERVICE
+
     tmpfs:
       - /tmp:size=50M,noexec,nosuid,nodev
 

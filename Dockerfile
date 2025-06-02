@@ -1,64 +1,33 @@
-###
-### STAGE 1: builder (usa il tuo build.sh per compilare)
-###
-FROM ubuntu:22.04 AS builder
+# ---------- Dockerfile.runtime (solo runtime) ----------
+FROM ubuntu:22.04
 
-# 1. Installa le dipendenze di build (adatta qui di seguito se il tuo build.sh necessita
-#    di altri pacchetti: gcc, g++, make, cmake, ninja, vcpkg, git, librerie di sviluppo, ecc.)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-      build-essential \
-      cmake \
-      ninja-build \
-      wget \
-      ca-certificates \
-      git \
-    && rm -rf /var/lib/apt/lists/*
-
-# 2. Crea la working directory e copia TUTTO il tuo progetto (incl. build.sh)
-WORKDIR /src
-COPY . .
-
-# 3. Rendi eseguibile build.sh e lancialo
-#    (assicurati che, nel repository, build.sh abbia già i permessi corretti
-#     oppure il chmod +x qui glieli mette)
-RUN chmod +x ./build.sh \
-    && ./build.sh
-
-#  A questo punto ci deve essere un eseguibile “/src/build/stl2glb” creato da build.sh.
-#  Per sicurezza, controlla:
-RUN ls -l /src/build/stl2glb
-
-
-###
-### STAGE 2: runtime (solo le dipendenze di esecuzione + binario)
-###
-FROM ubuntu:22.04 AS runtime
-
-# 4. Installa SOLO le librerie di runtime necessarie al tuo stl2glb
-#    (adatta pure qui: libssl, libstdc++, ca-certificates, ecc. secondo le dipendenze econometriche)
+# 1) Installa soltanto le librerie di cui il tuo stl2glb ha bisogno per girare
+#    (adatta l’elenco se servono altre .so)
 RUN apt-get update && apt-get install -y --no-install-recommends \
       libssl3 \
       ca-certificates \
       wget \
     && rm -rf /var/lib/apt/lists/*
 
-# 5. Crea un utente non-root (per ragioni di sicurezza)
+# 2) Crea un utente “appuser” non-root per ragioni di sicurezza
 RUN groupadd -g 1000 appgroup \
     && useradd -m -u 1000 -g appgroup appuser
 
-# 6. Prepara /app, copia il binario dal builder e assicurati che sia +x
+# 3) Fai diventare /app proprietà di appuser
 WORKDIR /app
 RUN chown -R appuser:appgroup /app
 
-COPY --from=builder /src/build/stl2glb /app/stl2glb
+# 4) Copia il binario dal contesto di build
+#    Attenzione: quando chiameremo "docker build" dovremo fare build dentro la cartella che contiene "build/stl2glb".
+COPY build/stl2glb /app/stl2glb
 RUN chmod +x /app/stl2glb \
     && chown appuser:appgroup /app/stl2glb
 
-# 7. Switch all’utente non-root
+# 5) Passa a utente non-root
 USER appuser
 
-# 8. Espone la porta (se il tuo stl2glb serve su 8080)
+# 6) Espone la porta sulla quale stl2glb serve (ad esempio 8080)
 EXPOSE 8080
 
-# 9. Definisce l’entrata diretta: lancia il binario appena copiato
+# 7) ENTRYPOINT: esegue direttamente il binario
 ENTRYPOINT ["/app/stl2glb"]
