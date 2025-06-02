@@ -1,14 +1,5 @@
 # .dockerignore - Ottimizzato per build veloci
 
-# Build artifacts
-build/
-cmake-build-*/
-.cmake/
-CMakeCache.txt
-CMakeFiles/
-*.cmake
-Makefile
-
 # IDE
 .vscode/
 .idea/
