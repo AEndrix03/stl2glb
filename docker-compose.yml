@@ -5,7 +5,7 @@ networks:
     driver: bridge
 
 services:
-  # Servizio di build che usa VCPKG dall'host - Ubuntu based
+  # Servizio di build che usa VCPKG dall'host
   builder:
     image: ubuntu:22.04
     container_name: stl2glb_builder
@@ -22,7 +22,6 @@ services:
         build-essential \
         cmake \
         ninja-build \
-        libssl-dev \
         pkg-config \
         ca-certificates \
         && rm -rf /var/lib/apt/lists/*
@@ -47,7 +46,7 @@ services:
       export VCPKG_TARGET_TRIPLET=x64-linux
       
       cmake -B build -S . \
-        -DCMAKE_BUILD_TYPE=MinSizeRel \
+        -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake \
         -DVCPKG_TARGET_TRIPLET=x64-linux \
         -DVCPKG_INSTALLED_DIR=/vcpkg/installed \
@@ -56,13 +55,14 @@ services:
         -GNinja
       
       echo "🔨 Building project..."
-      cmake --build build --config MinSizeRel --parallel
+      cmake --build build --config Release --parallel
       
       echo "✂️ Stripping executable..."
       strip build/stl2glb
       
       echo "📦 Copying to output..."
       cp build/stl2glb /output/
+      chmod +x /output/stl2glb
       ls -la /output/
       
       echo "✅ Build completed!"
@@ -70,9 +70,12 @@ services:
     networks:
       - stl2glb-net
 
-  # Servizio app - Ubuntu based per compatibilità
+  # Servizio app runtime
   app:
-    image: ubuntu:22.04
+    build:
+      context: .
+      dockerfile: Dockerfile.runtime
+    image: stl2glb:runtime
     container_name: stl2glb_app
     restart: always
     depends_on:
@@ -80,14 +83,7 @@ services:
         condition: service_completed_successfully
     volumes:
       - build_output:/app:ro
-    entrypoint: ["/bin/bash", "-c"]
-    command: |
-      "apt-get update && apt-get install -y --no-install-recommends \
-         libssl3 ca-certificates wget && \
-       rm -rf /var/lib/apt/lists/* && \
-       useradd -m -u 1000 appuser 2>/dev/null || true && \
-       exec su appuser -c '/app/stl2glb'"
-    
+
     ports:
       - "9002:8080"
     env_file:
@@ -111,7 +107,7 @@ services:
           cpus: '0.1'
           memory: 128M
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
       interval: 30s
       timeout: 5s
       retries: 3
