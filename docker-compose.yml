@@ -11,21 +11,61 @@ services:
     volumes:
       - ./:/src:ro
       - /home/vcpkg:/vcpkg:ro
-      - build_output:/build_output        # <- qui il builder copia “stl2glb” in /build_output/
+      - build_output:/output
     working_dir: /src
-    command: >
-      bash -c "
-        mkdir -p /build &&
-        cmake -B /build -S . \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake \
-          -DVCPKG_TARGET_TRIPLET=x64-linux \
-          -DVCPKG_INSTALLED_DIR=/vcpkg/installed &&
-        cmake --build /build --config Release --parallel &&
-        strip /build/stl2glb &&
-        cp /build/stl2glb /build_output/ &&
-        chmod +x /build_output/stl2glb
-      "
+    command: |
+      /bin/bash -c '
+      set -e
+      echo "🔧 Installing build dependencies..."
+      apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        cmake \
+        ninja-build \
+        pkg-config \
+        ca-certificates \
+        && rm -rf /var/lib/apt/lists/*
+      
+      echo "📁 Creating clean build directory..."
+      rm -rf /build
+      mkdir -p /build
+      cd /build
+      
+      echo "📋 Copying source files..."
+      cp -r /src/* /build/
+      rm -rf /build/build /build/cmake-build-* /build/CMakeCache.txt
+      
+      echo "🔨 Fixing STLParser.cpp if needed..."
+      if [ -f "src/STLParser.cpp" ]; then
+        grep -q "#include <cmath>" src/STLParser.cpp || \
+        sed -i "/#include <atomic>/a #include <cmath>" src/STLParser.cpp
+      fi
+      
+      echo "🏗️ Building with VCPKG..."
+      export VCPKG_ROOT=/vcpkg
+      export VCPKG_TARGET_TRIPLET=x64-linux
+      
+      cmake -B build -S . \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake \
+        -DVCPKG_TARGET_TRIPLET=x64-linux \
+        -DVCPKG_INSTALLED_DIR=/vcpkg/installed \
+        -DVCPKG_MANIFEST_MODE=OFF \
+        -DCMAKE_PREFIX_PATH="/vcpkg/installed/x64-linux;/vcpkg/installed/x64-linux/share" \
+        -GNinja
+      
+      echo "🔨 Building project..."
+      cmake --build build --config Release --parallel
+      
+      echo "✂️ Stripping executable..."
+      strip build/stl2glb
+      
+      echo "📦 Copying to output..."
+      cp build/stl2glb /output/
+      chmod +x /output/stl2glb
+      ls -la /output/
+      
+      echo "✅ Build completed!"
+      '
     networks:
       - stl2glb-net
 
