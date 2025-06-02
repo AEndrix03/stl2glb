@@ -5,120 +5,53 @@ networks:
     driver: bridge
 
 services:
-  # Servizio di build che usa VCPKG dall'host
   builder:
     image: ubuntu:22.04
     container_name: stl2glb_builder
     volumes:
       - ./:/src:ro
       - /home/vcpkg:/vcpkg:ro
-      - build_output:/output
+      # Notare che NON serve alcun build_output:/output come volume,
+      # perché il Dockerfile prende in carico tutto internamente.
     working_dir: /src
-    command: |
-      /bin/bash -c '
-      set -e
-      echo "🔧 Installing build dependencies..."
-      apt-get update && apt-get install -y --no-install-recommends \
-        build-essential \
-        cmake \
-        ninja-build \
-        pkg-config \
-        ca-certificates \
-        && rm -rf /var/lib/apt/lists/*
-      
-      echo "📁 Creating clean build directory..."
-      rm -rf /build
-      mkdir -p /build
-      cd /build
-      
-      echo "📋 Copying source files..."
-      cp -r /src/* /build/
-      rm -rf /build/build /build/cmake-build-* /build/CMakeCache.txt
-      
-      echo "🔨 Fixing STLParser.cpp if needed..."
-      if [ -f "src/STLParser.cpp" ]; then
-        grep -q "#include <cmath>" src/STLParser.cpp || \
-        sed -i "/#include <atomic>/a #include <cmath>" src/STLParser.cpp
-      fi
-      
-      echo "🏗️ Building with VCPKG..."
-      export VCPKG_ROOT=/vcpkg
-      export VCPKG_TARGET_TRIPLET=x64-linux
-      
-      cmake -B build -S . \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake \
-        -DVCPKG_TARGET_TRIPLET=x64-linux \
-        -DVCPKG_INSTALLED_DIR=/vcpkg/installed \
-        -DVCPKG_MANIFEST_MODE=OFF \
-        -DCMAKE_PREFIX_PATH="/vcpkg/installed/x64-linux;/vcpkg/installed/x64-linux/share" \
-        -GNinja
-      
-      echo "🔨 Building project..."
-      cmake --build build --config Release --parallel
-      
-      echo "✂️ Stripping executable..."
-      strip build/stl2glb
-      
-      echo "📦 Copying to output..."
-      cp build/stl2glb /output/
-      chmod +x /output/stl2glb
-      ls -la /output/
-      
-      echo "✅ Build completed!"
-      '
+    command: >
+      bash -c "
+        mkdir -p /build &&
+        cmake -B /build -S . \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake \
+          -DVCPKG_TARGET_TRIPLET=x64-linux \
+          -DVCPKG_INSTALLED_DIR=/vcpkg/installed &&
+        cmake --build /build --config Release --parallel &&
+        strip /build/stl2glb
+      "
+    # L'immagine “builder” viene però usata solo per generare il binario,
+    # non la useremo come runtime. Docker Compose considererà questo servizio
+    # come “dipendenza di build” (ma non lo terremo in esecuzione in produzione).
     networks:
       - stl2glb-net
 
-  # Servizio app runtime
   app:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: stl2glb:runtime
+      dockerfile: Dockerfile    # il Dockerfile multi‐stage di cui sopra
+    image: stl2glb:runtime      # nome “stl2glb:runtime” (o come vuoi)
     container_name: stl2glb_app
-    restart: always
     depends_on:
-      builder:
-        condition: service_completed_successfully
-    volumes:
-      - build_output:/build_output
+      - builder
+    restart: always
     ports:
       - "9002:8080"
     env_file:
-      - .env
+      - .env                      # se ne hai bisogno
     environment:
       - MALLOC_ARENA_MAX=1
       - GOMAXPROCS=1
     dns:
       - 1.1.1.1
       - 8.8.8.8
-    extra_hosts:
-      - "minio:217.160.248.228"
-      - "minio.aredegalli.it:217.160.248.228"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
-          pids: 100
-        reservations:
-          cpus: '0.1'
-          memory: 128M
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 20s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "5m"
-        max-file: "2"
-        compress: "true"
     security_opt:
-      - no-new-privileges:true
+      - no-new-privileges:true   # o rimuovilo se ti dà problemi
     cap_drop:
       - ALL
     cap_add:
@@ -128,6 +61,7 @@ services:
     networks:
       - stl2glb-net
 
-volumes:
-  build_output:
-    driver: local
+# Non ti serve nessun volume “build_output”:
+# volumes:
+#   build_output:
+#     driver: local
