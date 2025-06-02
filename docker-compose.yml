@@ -82,8 +82,7 @@ services:
       builder:
         condition: service_completed_successfully
     volumes:
-      - build_output:/app:ro
-
+      - build_output:/build_output:ro
     ports:
       - "9002:8080"
     env_file:
