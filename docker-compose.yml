@@ -9,9 +9,8 @@ services:
     image: stl2glb:runtime
     container_name: stl2glb_app
     restart: always
-
-    # Se il tuo eseguibile richiede alcune environment variables,
-    # le puoi passare qui (o tramite un file .env). Esempio:
+    volumes:
+      - build.sh:build.sh
     env_file:
       - .env
     environment:
