@@ -11,6 +11,7 @@ services:
     volumes:
       - ./:/src:ro
       - /home/vcpkg:/vcpkg:ro
+      - build_output:/build_output        # <- qui il builder copia “stl2glb” in /build_output/
     working_dir: /src
     command: >
       bash -c "
@@ -21,27 +22,28 @@ services:
           -DVCPKG_TARGET_TRIPLET=x64-linux \
           -DVCPKG_INSTALLED_DIR=/vcpkg/installed &&
         cmake --build /build --config Release --parallel &&
-        strip /build/stl2glb
+        strip /build/stl2glb &&
+        cp /build/stl2glb /build_output/ &&
+        chmod +x /build_output/stl2glb
       "
-    # L'immagine “builder” viene però usata solo per generare il binario,
-    # non la useremo come runtime. Docker Compose considererà questo servizio
-    # come “dipendenza di build” (ma non lo terremo in esecuzione in produzione).
     networks:
       - stl2glb-net
 
   app:
     build:
       context: .
-      dockerfile: Dockerfile    # il Dockerfile multi‐stage di cui sopra
-    image: stl2glb:runtime      # nome “stl2glb:runtime” (o come vuoi)
+      dockerfile: Dockerfile       # il Dockerfile di solo runtime mostrato sopra
+    image: stl2glb:runtime
     container_name: stl2glb_app
     depends_on:
-      - builder
-    restart: always
+      builder:
+        condition: service_completed_successfully
+    volumes:
+      - build_output:/build_output    # <- monta il volume dove builder ha scritto il binario
     ports:
       - "9002:8080"
     env_file:
-      - .env                      # se ne hai bisogno
+      - .env
     environment:
       - MALLOC_ARENA_MAX=1
       - GOMAXPROCS=1
@@ -49,7 +51,7 @@ services:
       - 1.1.1.1
       - 8.8.8.8
     security_opt:
-      - no-new-privileges:true   # o rimuovilo se ti dà problemi
+      - no-new-privileges:true
     cap_drop:
       - ALL
     cap_add:
@@ -59,7 +61,6 @@ services:
     networks:
       - stl2glb-net
 
-# Non ti serve nessun volume “build_output”:
-# volumes:
-#   build_output:
-#     driver: local
+volumes:
+  build_output:
+    driver: local
