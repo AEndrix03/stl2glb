@@ -3,7 +3,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile.runtime
+      dockerfile: Dockerfile
     image: stl2glb:runtime
     container_name: stl2glb_app
     restart: always
