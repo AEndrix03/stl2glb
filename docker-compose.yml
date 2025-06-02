@@ -8,8 +8,6 @@ services:
       dockerfile: Dockerfile    # il multi-stage di sopra
     image: stl2glb:runtime
     container_name: stl2glb_app
-    depends_on:
-      - builder   # tecnicamente non necessario, ma rimane per la logica “build before run”
     restart: always
 
     # Se il tuo eseguibile richiede alcune environment variables,
