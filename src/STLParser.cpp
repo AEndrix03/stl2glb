@@ -1,4 +1,5 @@
 #include "stl2glb/STLParser.hpp"
+#include "stl2glb/Logger.hpp"
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -105,24 +106,28 @@ namespace stl2glb {
         size_t getSize() const { return size; }
     };
 
-    // Parser binario ottimizzato con SIMD dove possibile
+    // In STLParser.cpp - Parser binario corretto
     class OptimizedBinaryParser {
     private:
         const uint8_t* data;
         size_t size;
 
-        // Legge float con gestione endianness
-        inline float readFloat(size_t offset) const {
-            float value;
-            std::memcpy(&value, data + offset, sizeof(float));
-            return value;
-        }
+        // Metodo corretto per leggere triangoli STL binari
+        Triangle readTriangle(size_t offset) const {
+            Triangle tri;
 
-        // Legge uint32 con gestione endianness
-        inline uint32_t readUint32(size_t offset) const {
-            uint32_t value;
-            std::memcpy(&value, data + offset, sizeof(uint32_t));
-            return value;
+            // Usa la struttura raw per leggere esattamente 50 bytes
+            STLTriangleRaw raw;
+            std::memcpy(&raw, data + offset, sizeof(STLTriangleRaw));
+
+            // Copia i dati nella struttura Triangle non-packed
+            std::memcpy(tri.normal, raw.normal, sizeof(tri.normal));
+            std::memcpy(tri.vertex1, raw.vertex1, sizeof(tri.vertex1));
+            std::memcpy(tri.vertex2, raw.vertex2, sizeof(tri.vertex2));
+            std::memcpy(tri.vertex3, raw.vertex3, sizeof(tri.vertex3));
+            tri.attributeByteCount = raw.attributeByteCount;
+
+            return tri;
         }
 
     public:
@@ -134,106 +139,84 @@ namespace stl2glb {
                 throw std::runtime_error("STL file too small");
             }
 
-            // Leggi numero di triangoli
-            uint32_t numTriangles = readUint32(80);
+            // Header STL binario (80 bytes) + numero triangoli (4 bytes)
+            uint32_t numTriangles;
+            std::memcpy(&numTriangles, data + 80, sizeof(uint32_t));
 
-            // Validazione
-            size_t expectedSize = 84 + (numTriangles * 50);
+            Logger::info("Parsing STL with " + std::to_string(numTriangles) + " triangles");
+
+            // Validazione dimensione file
+            size_t expectedSize = 84 + (static_cast<size_t>(numTriangles) * 50);
             if (size < expectedSize) {
-                throw std::runtime_error("STL file truncated");
+                throw std::runtime_error("STL file truncated. Expected " +
+                                         std::to_string(expectedSize) + " bytes, got " + std::to_string(size));
             }
 
             std::vector<Triangle> triangles;
             triangles.reserve(numTriangles);
 
-            // Parse parallelo per file grandi
-            const size_t CHUNK_SIZE = 10000;
-            if (numTriangles > CHUNK_SIZE * 4) {
-                // Usa thread multipli
-                unsigned int numThreads = std::thread::hardware_concurrency();
-                if (numThreads == 0) numThreads = 4;
+            // Parse sequenziale per evitare problemi di threading
+            for (uint32_t i = 0; i < numTriangles; ++i) {
+                size_t offset = 84 + (i * 50);
+                Triangle tri = readTriangle(offset);
 
-                std::vector<std::thread> threads;
-                std::vector<std::vector<Triangle>> threadResults(numThreads);
-                std::atomic<size_t> nextChunk(0);
-
-                for (unsigned int t = 0; t < numThreads; ++t) {
-                    threads.emplace_back([&, t]() {
-                        std::vector<Triangle>& localTriangles = threadResults[t];
-                        localTriangles.reserve(numTriangles / numThreads + CHUNK_SIZE);
-
-                        size_t chunkIdx;
-                        while ((chunkIdx = nextChunk.fetch_add(1)) * CHUNK_SIZE < numTriangles) {
-                            size_t start = chunkIdx * CHUNK_SIZE;
-                            size_t end = std::min(start + CHUNK_SIZE, static_cast<size_t>(numTriangles));
-
-                            for (size_t i = start; i < end; ++i) {
-                                size_t offset = 84 + i * 50;
-                                Triangle tri;
-
-                                // Leggi normale
-                                tri.normal[0] = readFloat(offset);
-                                tri.normal[1] = readFloat(offset + 4);
-                                tri.normal[2] = readFloat(offset + 8);
-
-                                // Leggi vertici
-                                tri.vertex1[0] = readFloat(offset + 12);
-                                tri.vertex1[1] = readFloat(offset + 16);
-                                tri.vertex1[2] = readFloat(offset + 20);
-
-                                tri.vertex2[0] = readFloat(offset + 24);
-                                tri.vertex2[1] = readFloat(offset + 28);
-                                tri.vertex2[2] = readFloat(offset + 32);
-
-                                tri.vertex3[0] = readFloat(offset + 36);
-                                tri.vertex3[1] = readFloat(offset + 40);
-                                tri.vertex3[2] = readFloat(offset + 44);
-
-                                // Valida e correggi normale se necessario
-                                validateAndFixNormal(tri);
-
-                                localTriangles.push_back(tri);
-                            }
-                        }
-                    });
+                // Validazione base dei dati
+                if (!isValidTriangle(tri)) {
+                    Logger::warn("Invalid triangle at index " + std::to_string(i) + ", skipping");
+                    continue;
                 }
 
-                // Attendi tutti i thread
-                for (auto& thread : threads) {
-                    thread.join();
-                }
-
-                // Combina risultati
-                for (const auto& threadResult : threadResults) {
-                    triangles.insert(triangles.end(), threadResult.begin(), threadResult.end());
-                }
-            } else {
-                // Parse sequenziale per file piccoli
-                for (uint32_t i = 0; i < numTriangles; ++i) {
-                    size_t offset = 84 + i * 50;
-                    Triangle tri;
-
-                    // Copia diretta della struttura (più veloce)
-                    std::memcpy(&tri.normal, data + offset, 12);
-                    std::memcpy(&tri.vertex1, data + offset + 12, 12);
-                    std::memcpy(&tri.vertex2, data + offset + 24, 12);
-                    std::memcpy(&tri.vertex3, data + offset + 36, 12);
-
-                    validateAndFixNormal(tri);
-                    triangles.push_back(tri);
-                }
+                // Correggi normale se necessaria
+                validateAndFixNormal(tri);
+                triangles.push_back(tri);
             }
 
+            Logger::info("Successfully parsed " + std::to_string(triangles.size()) + " valid triangles");
             return triangles;
         }
 
     private:
-        inline void validateAndFixNormal(Triangle& tri) const {
-            float normalLen = std::sqrt(tri.normal[0] * tri.normal[0] +
-                                        tri.normal[1] * tri.normal[1] +
-                                        tri.normal[2] * tri.normal[2]);
+        bool isValidTriangle(const Triangle& tri) const {
+            // Verifica che i vertici non siano NaN o infiniti
+            for (int i = 0; i < 3; ++i) {
+                if (!std::isfinite(tri.vertex1[i]) || !std::isfinite(tri.vertex2[i]) ||
+                    !std::isfinite(tri.vertex3[i])) {
+                    return false;
+                }
+            }
 
-            if (normalLen < 0.1f) {
+            // Verifica che il triangolo non sia degenere (area > 0)
+            float v1[3] = {
+                    tri.vertex2[0] - tri.vertex1[0],
+                    tri.vertex2[1] - tri.vertex1[1],
+                    tri.vertex2[2] - tri.vertex1[2]
+            };
+            float v2[3] = {
+                    tri.vertex3[0] - tri.vertex1[0],
+                    tri.vertex3[1] - tri.vertex1[1],
+                    tri.vertex3[2] - tri.vertex1[2]
+            };
+
+            // Cross product per area
+            float cross[3] = {
+                    v1[1] * v2[2] - v1[2] * v2[1],
+                    v1[2] * v2[0] - v1[0] * v2[2],
+                    v1[0] * v2[1] - v1[1] * v2[0]
+            };
+
+            float area = std::sqrt(cross[0]*cross[0] + cross[1]*cross[1] + cross[2]*cross[2]);
+            return area > 1e-6f; // Triangolo valido se area > epsilon
+        }
+
+        void validateAndFixNormal(Triangle& tri) const {
+            float normalLen = std::sqrt(
+                    tri.normal[0] * tri.normal[0] +
+                    tri.normal[1] * tri.normal[1] +
+                    tri.normal[2] * tri.normal[2]
+            );
+
+            // Se la normale è invalida o zero, ricalcolala
+            if (normalLen < 0.1f || !std::isfinite(normalLen)) {
                 // Calcola normale dal prodotto vettoriale
                 float v1[3] = {
                         tri.vertex2[0] - tri.vertex1[0],
@@ -250,189 +233,29 @@ namespace stl2glb {
                 tri.normal[1] = v1[2] * v2[0] - v1[0] * v2[2];
                 tri.normal[2] = v1[0] * v2[1] - v1[1] * v2[0];
 
-                float len = std::sqrt(tri.normal[0] * tri.normal[0] +
-                                      tri.normal[1] * tri.normal[1] +
-                                      tri.normal[2] * tri.normal[2]);
+                float len = std::sqrt(
+                        tri.normal[0] * tri.normal[0] +
+                        tri.normal[1] * tri.normal[1] +
+                        tri.normal[2] * tri.normal[2]
+                );
 
-                if (len > 0) {
+                if (len > 1e-6f) {
                     tri.normal[0] /= len;
                     tri.normal[1] /= len;
                     tri.normal[2] /= len;
+                } else {
+                    // Normale default se il triangolo è degenere
+                    tri.normal[0] = 0.0f;
+                    tri.normal[1] = 0.0f;
+                    tri.normal[2] = 1.0f;
                 }
-            }
-        }
-    };
-
-    // Parser ASCII ottimizzato
-    class OptimizedASCIIParser {
-    private:
-        const char* data;
-        size_t size;
-
-        // Fast float parsing
-        inline bool fastParseFloat(const char*& ptr, float& value) {
-            char* end;
-            value = std::strtof(ptr, &end);
-            if (end == ptr) return false;
-            ptr = end;
-            return true;
-        }
-
-        // Skip whitespace
-        inline void skipWhitespace(const char*& ptr) {
-            while (*ptr && std::isspace(*ptr)) ++ptr;
-        }
-
-    public:
-        OptimizedASCIIParser(const void* fileData, size_t fileSize)
-                : data(static_cast<const char*>(fileData)), size(fileSize) {}
-
-        std::vector<Triangle> parse() {
-            std::vector<Triangle> triangles;
-            triangles.reserve(size / 200); // Stima approssimativa
-
-            const char* ptr = data;
-            const char* end = data + size;
-
-            Triangle currentTriangle;
-            int vertexCount = 0;
-            bool inFacet = false;
-
-            while (ptr < end) {
-                skipWhitespace(ptr);
-
-                // Cerca keywords
-                if (std::strncmp(ptr, "facet normal", 12) == 0) {
-                    ptr += 12;
-                    skipWhitespace(ptr);
-
-                    // FIX: Usa variabili temporanee per evitare binding di campi packed
-                    float nx, ny, nz;
-                    fastParseFloat(ptr, nx);
-                    fastParseFloat(ptr, ny);
-                    fastParseFloat(ptr, nz);
-
-                    currentTriangle.normal[0] = nx;
-                    currentTriangle.normal[1] = ny;
-                    currentTriangle.normal[2] = nz;
-
-                    inFacet = true;
-                    vertexCount = 0;
-                } else if (std::strncmp(ptr, "vertex", 6) == 0 && inFacet) {
-                    ptr += 6;
-                    skipWhitespace(ptr);
-
-                    float x, y, z;
-                    if (fastParseFloat(ptr, x) && fastParseFloat(ptr, y) && fastParseFloat(ptr, z)) {
-                        switch (vertexCount) {
-                            case 0:
-                                currentTriangle.vertex1[0] = x;
-                                currentTriangle.vertex1[1] = y;
-                                currentTriangle.vertex1[2] = z;
-                                break;
-                            case 1:
-                                currentTriangle.vertex2[0] = x;
-                                currentTriangle.vertex2[1] = y;
-                                currentTriangle.vertex2[2] = z;
-                                break;
-                            case 2:
-                                currentTriangle.vertex3[0] = x;
-                                currentTriangle.vertex3[1] = y;
-                                currentTriangle.vertex3[2] = z;
-                                break;
-                        }
-                        vertexCount++;
-                    }
-                } else if (std::strncmp(ptr, "endfacet", 8) == 0 && inFacet) {
-                    if (vertexCount == 3) {
-                        validateAndFixNormal(currentTriangle);
-                        triangles.push_back(currentTriangle);
-                    }
-                    inFacet = false;
-                    ptr += 8;
-                }
-
-                // Vai alla prossima linea
-                while (ptr < end && *ptr != '\n') ++ptr;
-                if (ptr < end) ++ptr;
-            }
-
-            return triangles;
-        }
-
-    private:
-        void validateAndFixNormal(Triangle& tri) const {
-            // Stessa logica del parser binario
-            float normalLen = std::sqrt(tri.normal[0] * tri.normal[0] +
-                                        tri.normal[1] * tri.normal[1] +
-                                        tri.normal[2] * tri.normal[2]);
-
-            if (normalLen < 0.1f) {
-                float v1[3] = {
-                        tri.vertex2[0] - tri.vertex1[0],
-                        tri.vertex2[1] - tri.vertex1[1],
-                        tri.vertex2[2] - tri.vertex1[2]
-                };
-                float v2[3] = {
-                        tri.vertex3[0] - tri.vertex1[0],
-                        tri.vertex3[1] - tri.vertex1[1],
-                        tri.vertex3[2] - tri.vertex1[2]
-                };
-
-                tri.normal[0] = v1[1] * v2[2] - v1[2] * v2[1];
-                tri.normal[1] = v1[2] * v2[0] - v1[0] * v2[2];
-                tri.normal[2] = v1[0] * v2[1] - v1[1] * v2[0];
-
-                float len = std::sqrt(tri.normal[0] * tri.normal[0] +
-                                      tri.normal[1] * tri.normal[1] +
-                                      tri.normal[2] * tri.normal[2]);
-
-                if (len > 0) {
-                    tri.normal[0] /= len;
-                    tri.normal[1] /= len;
-                    tri.normal[2] /= len;
-                }
-            }
-        }
-    };
-
-    // Rileva se il file è ASCII controllando solo l'inizio
-    bool isASCII(const void* data, size_t size) {
-        if (size < 6) return false;
-
-        const char* charData = static_cast<const char*>(data);
-
-        // Se inizia con "solid "
-        if (std::strncmp(charData, "solid ", 6) == 0) {
-            // Controlla i primi 1KB per caratteri non-ASCII
-            size_t checkSize = std::min(size, size_t(1024));
-            for (size_t i = 0; i < checkSize; ++i) {
-                unsigned char c = static_cast<unsigned char>(charData[i]);
-                if (c > 127 || (c < 32 && c != '\r' && c != '\n' && c != '\t')) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        return false;
-    }
-
-    std::vector<Triangle> STLParser::parse(const std::string& path) {
-        try {
-            // Usa memory mapping per performance ottimale
-            MemoryMappedFile mmFile(path);
-
-            if (isASCII(mmFile.getData(), mmFile.getSize())) {
-                OptimizedASCIIParser parser(mmFile.getData(), mmFile.getSize());
-                return parser.parse();
             } else {
-                OptimizedBinaryParser parser(mmFile.getData(), mmFile.getSize());
-                return parser.parse();
+                // Normalizza la normale esistente
+                tri.normal[0] /= normalLen;
+                tri.normal[1] /= normalLen;
+                tri.normal[2] /= normalLen;
             }
-        } catch (const std::exception& e) {
-            throw std::runtime_error("Failed to parse STL file: " + std::string(e.what()));
         }
-    }
+    };
 
 } // namespace stl2glb
