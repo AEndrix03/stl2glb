@@ -6,6 +6,8 @@ services:
     image: stl2glb:runtime
     container_name: stl2glb_app
     restart: always
+    ports:
+      - "9002:8080"
 
     env_file:
       - .env
